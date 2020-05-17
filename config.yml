@@ -1,0 +1,4 @@
+settings:
+  bot-name: "NickInTwitch"
+  token: "Token"
+  channel: "ChannelForUseBot"
