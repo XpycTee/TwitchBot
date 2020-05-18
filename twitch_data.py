@@ -8,7 +8,7 @@ HOST = "irc.twitch.tv"
 PORT = 6667
 NICK = data["settings"]["bot-name"]
 PASS = data["settings"]["token"]
-CHAN = data["settings"]["channel"]
+CHAN = data["settings"]["channel"].lower()
 RATE = (20/30)
 
 oplist = {}
