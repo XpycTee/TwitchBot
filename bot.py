@@ -14,7 +14,6 @@ def main():
 	s.send("PASS {}\r\n".format(twitch.PASS).encode("utf-8"))
 	s.send("NICK {}\r\n".format(twitch.NICK).encode("utf-8"))
 	s.send("JOIN #{}\r\n".format(twitch.CHAN).encode("utf-8"))
-	#s.send("JOIN #{}\r\n".format("sgtgrafoyni").encode("utf-8"))
 	
 
 	chat_message = re.compile(r"^:\w+!\w+@\w+\.tmi\.twitch\.tv PRIVMSG #\w+ :")
@@ -51,7 +50,6 @@ def main():
 				if username != "tmi":
 					sleep(2)
 					utils.hello(s, username)
-				#:xpyctee!xpyctee@xpyctee.tmi.twitch.tv PRIVMSG #xpyctee:
 			if message.strip() == "!hi":
 				utils.hello(s, username)
 			if message.strip() == "!roll":
