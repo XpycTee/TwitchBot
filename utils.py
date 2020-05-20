@@ -7,9 +7,6 @@ from time import sleep
 def mess(sock, mess):
 	sock.send("PRIVMSG #{} :{}\r\n".format(twitch.CHAN, mess).encode("utf-8"))
 
-def hello(sock, user):
-	mess(sock, "Привет, @{} KonCha <3".format(user))
-
 #http://tmi.twitch.tv/group/user/xpyctee/chatters
 def fillOpList():
 	while True:
