@@ -40,7 +40,8 @@ def main():
 					all_mods.insert(len(all_mods), file)
 			for mod in all_mods:
 				ret = None
-				proc = subprocess.Popen(['py', '-u', f'modules/{mod}', message, username], stdout=subprocess.PIPE, universal_newlines=True)
+
+				proc = subprocess.Popen([sys.executable, '-u', f'modules/{mod}', message, username, str(utils.isOp(username))], stdout=subprocess.PIPE, universal_newlines=True)
 				for line in proc.stdout:
 					ret = line
 				if ret != None:
