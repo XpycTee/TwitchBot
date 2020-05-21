@@ -2,17 +2,17 @@ import sys
 from time import sleep
 from random import randint
 
-def main(message, username):
+def execute(message, username):
 	if message.strip() == "!hi":
-		print(f"Привет, @{username} KonCha <3")
+		return f"Привет, @{username} KonCha <3"
 	if message.strip() == "!roll":
-		print(f"{username} выкинул: {str(randint(1, 6))}")
+		return f"{username} выкинул: {str(randint(1, 6))}"
 	if message.strip() == "!банкет":
-		print(f"{username} накрыл стол для чатика из шашлычка, картошечки, грибочков и пыва panicBasket TakeNRG")
+		return f"{username} накрыл стол для чатика из шашлычка, картошечки, грибочков и пыва panicBasket TakeNRG"
 	if message.strip() == "!смех":
-		print(f"{username} ХаХа-ХаХа")
+		return f"{username} ХаХа-ХаХа"
 	if message.strip() == "!вогне":
-		print("grafoyniPls Deutschland, mein Herz in Flammen grafoyniPls")
+		return "grafoyniPls Deutschland, mein Herz in Flammen grafoyniPls"
 	checkHelloMess = message.lower()
 	if (checkHelloMess.find("xpyctee") != -1 and 
 			(checkHelloMess.find("привет") != -1 or 
@@ -33,6 +33,4 @@ def main(message, username):
 			checkHelloMess.find("hello") != -1)):
 		if username != "tmi":
 			sleep(2)
-			print(f"Привет, @{username} KonCha <3")
-
-main(sys.argv[1], sys.argv[2])
+			return f"Привет, @{username} KonCha <3"

@@ -1,9 +1,9 @@
 import sys, random
 
-def main(message, username):
+def execute(message, username):
 	if  message.strip() == "!ранг" or message.strip() == "!rang":
 		if username == "tovarischcummissar":
-			print(f"@{username} \"Генералиссимус\"")
+			return f"@{username} \"Генералиссимус\""
 		else:
 			rangs = [
 			'Рядовой','Рядовой','Рядовой','Рядовой','Рядовой','Рядовой','Рядовой','Рядовой','Рядовой','Рядовой','Рядовой','Рядовой','Рядовой','Рядовой','Рядовой','Рядовой','Рядовой','Рядовой',
@@ -21,6 +21,4 @@ def main(message, username):
 			'Генерал-полковник','Генерал-полковник','Генерал-полковник',
 			'Генерал стрима','Генерал стрима',
 			'Маршал стрима']
-			print(f"@{username} получил звание \"{random.choice(rangs)}\"")
-
-main(sys.argv[1], sys.argv[2])
+			return f"@{username} получил звание \"{random.choice(rangs)}\""

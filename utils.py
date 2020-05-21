@@ -22,7 +22,7 @@ def reqStreamData():
 	return reqAPItwitch(url)
 
 def streamIsLive():
-	stream = reqStreamData()
+	stream = reqStreamData()["stream"]
 	if stream != None:
 		return True
 	else:

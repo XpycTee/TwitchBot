@@ -1,28 +1,27 @@
 import sys, datetime
-from ..utils import reqStreamData, streamIsLive
+import utils
 
-
-def main(message, username):
+def execute(message, username):
 	message = message.lower()
 	if (message.strip() == "!uptime" or message.strip() == "!time" or message.strip() == "!время" or (message.find("сколько") != -1 and (message.find("идет") != -1 or message.find("длится") != -1) and message.find("стрим") != -1)):
-		if utils.streamIsLive() == False:
-			print(f"@{username}, на данный момент трансляция не идет <3")
-			return None
-		streamStartTimeAPI = utils.reqStreamData()['stream']['created_at']
+		if utils.streamIsLive():
+			streamStartTimeAPI = utils.reqStreamData()['stream']['created_at']
 
-		startTime = datetime.datetime.strptime(streamStartTimeRaw,"%Y-%m-%dT%H:%M:%SZ")#datetime.datetime(2020, 5, 19, 15, 50, 0)
-		nowTimeNoForm = datetime.datetime.now(datetime.timezone.utc)
-		nowTime = datetime.datetime(nowTimeNoForm.year, nowTimeNoForm.month, nowTimeNoForm.day, nowTimeNoForm.hour, nowTimeNoForm.minute, nowTimeNoForm.second)
-		deltaTime = nowTime - startTime
-		seconds = deltaTime.total_seconds()
+			startTime = datetime.datetime.strptime(streamStartTimeAPI,"%Y-%m-%dT%H:%M:%SZ")#datetime.datetime(2020, 5, 19, 15, 50, 0)
+			nowTimeNoForm = datetime.datetime.now(datetime.timezone.utc)
+			nowTime = datetime.datetime(nowTimeNoForm.year, nowTimeNoForm.month, nowTimeNoForm.day, nowTimeNoForm.hour, nowTimeNoForm.minute, nowTimeNoForm.second)
+			deltaTime = nowTime - startTime
+			seconds = deltaTime.total_seconds()
 
-		deltaHours = int(seconds // 3600)
-		deltaMinutes = int((seconds % 3600) // 60)
+			deltaHours = int(seconds // 3600)
+			deltaMinutes = int((seconds % 3600) // 60)
 
-		wordHours = declensionNumsRus(deltaHours, "час", "часа", "часов")
-		wordMinutes = declensionNumsRus(deltaMinutes, "минута", "минуты", "минут")
+			wordHours = declensionNumsRus(deltaHours, "час", "часа", "часов")
+			wordMinutes = declensionNumsRus(deltaMinutes, "минута", "минуты", "минут")
 
-		print(f"@{username}, {deltaHours} {wordHours} {deltaMinutes} {wordMinutes} <3")
+			return f"@{username}, {deltaHours} {wordHours} {deltaMinutes} {wordMinutes} <3"
+		else:
+			return f"@{username}, на данный момент трансляция не идет <3"
 
 def declensionNumsRus(number, singlNomin, singlGeni, pluralGeni):
 	""" 
@@ -40,8 +39,3 @@ def declensionNumsRus(number, singlNomin, singlGeni, pluralGeni):
 	if (number % 10 >= 5 and number % 10 <= 9) or number % 10 == 0 or (number >= 11 and number <= 19):
 		result = pluralGeni
 	return result
-
-
-
-
-main(sys.argv[1], sys.argv[2])

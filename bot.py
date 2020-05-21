@@ -30,20 +30,15 @@ def main():
 			username = re.search(r"\w+", response).group(0)
 			message = chat_message.sub("", response)
 			print(username.strip()+": "+message.strip())
-
-			all_mods = []
 			for file in os.listdir(".\\modules"):
-				if file.endswith(".py"):
-					all_mods.insert(len(all_mods), file)
-			for mod in all_mods:
-				ret = None
-
-				proc = subprocess.Popen([sys.executable, '-u', f'modules/{mod}', message, username, str(utils.isOp(username))], stdout=subprocess.PIPE, universal_newlines=True)
-				for line in proc.stdout:
-					ret = line
-				if ret != None:
-					utils.mess(ssl_sock, ret)
-					ret = None
+				if file != "__init__.py":
+					if file.endswith(".py"):
+						execFunc = getattr(globals()[file.replace('.py', '')], "execute")
+						#print(file.replace('.py', ''))
+						ret = execFunc(message, username)
+						if ret != None:
+							utils.mess(ssl_sock, ret)
+							break
 		sleep(1)
 
 def waitCLI(sock):
