@@ -1,4 +1,5 @@
 settings:
   bot-name: "NickInTwitch"
-  token: "Token"
+  irc-token: "Token" #Chat OAuth token without: "oauth:"
+  api-token: "Token" #[Otional] Twitch API Kraken Token 
   channel: "ChannelForUseBot"
