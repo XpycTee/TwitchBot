@@ -8,14 +8,11 @@ import urllib.request as urllib
 from time import sleep
 from modules import *
 
-def irc_send():
-	pass
-
 def main():
 	tcp_sock = socket.socket()
 	ssl_sock = ssl.wrap_socket(tcp_sock)
 	ssl_sock.connect((twitch.HOST, twitch.PORT))
-	ssl_sock.send("PASS {}\r\n".format(twitch.PASS).encode("utf-8"))
+	ssl_sock.send("PASS oauth:{}\r\n".format(twitch.PASS).encode("utf-8"))
 	ssl_sock.send("NICK {}\r\n".format(twitch.NICK).encode("utf-8"))
 	ssl_sock.send("JOIN #{}\r\n".format(twitch.CHAN).encode("utf-8"))
 	

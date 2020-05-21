@@ -1,11 +1,32 @@
 import twitch_data as twitch 
 import urllib.request as urllib
-import json
+import json, requests
 import time, _thread
 from time import sleep
 
 def mess(sock, mess):
 	sock.send("PRIVMSG #{} :{}\r\n".format(twitch.CHAN, mess).encode("utf-8"))
+
+def reqAPItwitch(url):
+	req = ""
+	if twitch.API != "":
+		req = requests.get(url, headers = {"Authorization" : f"OAuth {twitch.PASS}", "Accept" : "application/vnd.twitchtv.v5+json"})
+	else:
+		req = requests.get(url, headers = {"Client-ID" : twitch.API, "Accept" : "application/vnd.twitchtv.v5+json"})
+	req.raise_for_status()
+	return req.json()
+
+def reqStreamData():
+	userID = reqAPItwitch(f'https://api.twitch.tv/kraken/users?login={twitch.CHAN}')['users'][0]['_id']
+	url = f'https://api.twitch.tv/kraken/streams/{userID}'
+	return reqAPItwitch(url)
+
+def streamIsLive():
+	stream = reqStreamData()
+	if stream != None:
+		return True
+	else:
+		return False
 
 #http://tmi.twitch.tv/group/user/xpyctee/chatters
 def fillOpList():
