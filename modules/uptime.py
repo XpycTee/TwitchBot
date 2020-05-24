@@ -3,7 +3,7 @@ import utils
 
 def execute(message, username):
 	message = message.lower()
-	if (message.strip() == "!uptime" or message.strip() == "!time" or message.strip() == "!время" or (message.find("сколько") != -1 and (message.find("идет") != -1 or message.find("длится") != -1) and message.find("стрим") != -1)):
+	if (message.strip() == "!uptime" or message.strip() == "!time" or message.strip() == "!время" or (message.find("сколько") != -1 and (message.find("идёт") != -1 or message.find("идет") != -1 or message.find("длится") != -1) and message.find("стрим") != -1)):
 		if utils.streamIsLive():
 			streamStartTimeAPI = utils.reqStreamData()['stream']['created_at']
 
