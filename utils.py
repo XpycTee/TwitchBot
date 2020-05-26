@@ -37,6 +37,8 @@ def fillOpList():
 			res = urllib.urlopen(req).read()
 			twitch.oplist.clear()
 			data = json.loads(res) 
+			for p in data["chatters"]["broadcaster"]:
+				twitch.oplist[p] = "bcaster"
 			for p in data["chatters"]["moderators"]:
 				twitch.oplist[p] = "mod"
 			for p in data["chatters"]["global_mods"]:

@@ -1,0 +1,9 @@
+modules:
+  grafonRndRangs:
+    enabled: true
+  points:
+    enabled: true
+  test:
+    enabled: true
+  uptime:
+    enabled: true
