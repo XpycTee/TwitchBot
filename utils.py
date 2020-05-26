@@ -1,8 +1,9 @@
-import twitch_data as twitch 
+import json, requests, time, _thread
+
 import urllib.request as urllib
-import json, requests
-import time, _thread
 from time import sleep
+
+import twitch_data as twitch 
 
 def mess(sock, mess):
 	sock.send("PRIVMSG #{} :{}\r\n".format(twitch.CHAN, mess).encode("utf-8"))
@@ -28,11 +29,10 @@ def streamIsLive():
 	else:
 		return False
 
-#http://tmi.twitch.tv/group/user/xpyctee/chatters
 def fillOpList():
 	while True:
 		try:
-			url = 'http://tmi.twitch.tv/group/user/xpyctee/chatters'
+			url = f'http://tmi.twitch.tv/group/user/{twitch.CHAN}/chatters'
 			req = urllib.Request(url, headers={"accept": "*/*"})
 			res = urllib.urlopen(req).read()
 			twitch.oplist.clear()

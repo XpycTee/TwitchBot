@@ -1,12 +1,10 @@
-import utils
-import ssl, socket, json, re, yaml
-import time, _thread
-import sys, os, types, importlib, datetime
-import subprocess
-import twitch_data as twitch
+import sys, os, types, importlib, datetime, subprocess, time, _thread, ssl, socket, json, re, yaml
+
 import urllib.request as urllib
 from time import sleep
-import modules
+
+import twitch_data as twitch
+import modules, utils
 from modules import *
 
 def sock_connecting():
@@ -18,32 +16,24 @@ def sock_connecting():
 	ssl_sock.send("JOIN #{}\r\n".format(twitch.CHAN).encode("utf-8"))
 	return ssl_sock
 
-
 def reload_package(package):
     assert(hasattr(package, "__package__"))
     fn = package.__file__
     fn_dir = os.path.dirname(fn) + os.sep
     module_visit = {fn}
     del fn
-
     def reload_recursive_ex(module):
         importlib.reload(module)
-
         for module_child in vars(module).values():
             if isinstance(module_child, types.ModuleType):
                 fn_child = getattr(module_child, "__file__", None)
                 if (fn_child is not None) and fn_child.startswith(fn_dir):
                     if fn_child not in module_visit:
-                        # print("reloading:", fn_child, "from", module)
                         module_visit.add(fn_child)
                         reload_recursive_ex(module_child)
-
-
-
     return reload_recursive_ex(package)
 
 def main():
-
 	connected = False
 	while connected != True:
 		try:
@@ -70,7 +60,6 @@ def main():
 	settings = {}
 	with open('config.yml') as configFile:
 		settings = yaml.load(configFile, Loader=yaml.FullLoader)['settings']
-
 
 	if settings['logging']['file']:
 		if not 'log' in os.listdir():
@@ -107,6 +96,7 @@ def main():
 				today = datetime.datetime.today()
 				with open(f'log\\chat_{today.strftime("%Y-%m-%d")}.log', 'a') as log_file:
 					log_file.write(f"{username.strip()}: {message.strip()}\n")
+
 	return True
 
 def waitCLI(sock):
