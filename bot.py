@@ -94,7 +94,7 @@ def main():
 				print(f"{username.strip()}: {message.strip()}")
 			if settings['logging']['file']:
 				today = datetime.datetime.today()
-				with open(f'log\\chat_{today.strftime("%Y-%m-%d")}.log', 'a') as log_file:
+				with open(f'log\\chat_{today.strftime("%Y-%m-%d")}.log', 'a', encoding='utf-8') as log_file:
 					log_file.write(f"{username.strip()}: {message.strip()}\n")
 
 	return True
