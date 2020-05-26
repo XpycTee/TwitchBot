@@ -1,7 +1,7 @@
 import utils
 import ssl, socket, json, re, yaml
 import time, _thread
-import sys, os, types, importlib
+import sys, os, types, importlib, datetime
 import subprocess
 import twitch_data as twitch
 import urllib.request as urllib
@@ -43,6 +43,16 @@ def reload_package(package):
     return reload_recursive_ex(package)
 
 def main():
+
+	connected = False
+	while connected != True:
+		try:
+			sock = sock_connecting()
+			connected = True
+		except:
+			print("Нет соеденения")
+			sleep(1)
+
 	modulesList = {}
 	with open('modules.yml') as modulesFile:
 		modulesList = yaml.load(modulesFile, Loader=yaml.FullLoader)
@@ -57,34 +67,30 @@ def main():
 	with open('modules.yml', 'w') as modulesFile:
 		modulesData = yaml.dump(modulesList, modulesFile)
 
+	settings = {}
+	with open('config.yml') as configFile:
+		settings = yaml.load(configFile, Loader=yaml.FullLoader)['settings']
 
 
-
-	connected = False
-	while connected != True:
-		try:
-			ssl_sock = sock_connecting()
-			connected = True
-		except:
-			print("Нет соеденения")
-			sleep(1)
-
+	if settings['logging']['file']:
+		if not 'log' in os.listdir():
+			os.mkdir('log')
 
 	chat_message = re.compile(r"^:\w+!\w+@\w+\.tmi\.twitch\.tv PRIVMSG #\w+ :")
-	#utils.mess(ssl_sock, "Здрова, Всем! KonCha <3")
 
 	_thread.start_new_thread(utils.fillOpList, ())
-	#_thread.start_new_thread(waitCLI, (ssl_sock,))
+	#_thread.start_new_thread(waitCLI, (sock,))
+
 	while True:
-		response = ssl_sock.recv(1024).decode("utf-8")
+		response = sock.recv(1024).decode("utf-8")
 		if response == "PING :tmi.twitch.tv\r\n":
-			ssl_sock.send("PONG :tmi.twitch.tv\r\n".encode("utf-8"))
+			sock.send("PONG :tmi.twitch.tv\r\n".encode("utf-8"))
 		else: 
 			username = re.search(r"\w+", response).group(0)
 			message = chat_message.sub("", response)
-			print(username.strip()+": "+message.strip())
+
 			if (message.strip() == "!reload" and utils.isOp(username)):
-				utils.mess(ssl_sock, "Перезагрузка бота")
+				utils.mess(sock, "Перезагрузка бота")
 				break
 
 			for module in modulesList['modules']:
@@ -92,9 +98,15 @@ def main():
 					execFunc = getattr(globals()[module], "execute")
 					ret = execFunc(message, username)
 					if ret != None:
-						utils.mess(ssl_sock, ret)
+						utils.mess(sock, ret)
 						break
-		sleep(0.1)
+
+			if settings['logging']['live']:
+				print(f"{username.strip()}: {message.strip()}")
+			if settings['logging']['file']:
+				today = datetime.datetime.today()
+				with open(f'log\\chat_{today.strftime("%Y-%m-%d")}.log', 'a') as log_file:
+					log_file.write(f"{username.strip()}: {message.strip()}\n")
 	return True
 
 def waitCLI(sock):

@@ -6,11 +6,11 @@ with open('config.yml') as configFile:
 
 HOST = "irc.twitch.tv"
 PORT = 6697
-NICK = data["settings"]["bot-name"]
-PASS = data["settings"]["irc-token"]
-CHAN = data["settings"]["channel"].lower()
+NICK = data["twitch"]["bot-name"]
+PASS = data["twitch"]["irc-token"]
+CHAN = data["twitch"]["channel"].lower()
 RATE = (20/30)
 
-API = data["settings"]["irc-token"]
+API = data["twitch"]["irc-token"]
 
 oplist = {}
