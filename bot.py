@@ -76,6 +76,8 @@ def main():
 			sock.send("PONG :tmi.twitch.tv\r\n".encode("utf-8"))
 		else: 
 			username = re.search(r"\w+", response).group(0)
+			if username != 'tmi':
+				username = utils.reqAPItwitch(f'https://api.twitch.tv/kraken/users?login={username}')['users'][0]['display_name']
 			message = chat_message.sub("", response)
 
 			if (message.strip() == "!reload" and utils.isOp(username)):
