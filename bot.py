@@ -85,21 +85,19 @@ def main():
 					username = username
 			message = chat_message.sub("", response)
 
-			if (message.strip() == "!reload" and utils.isOp(username)):
-				utils.mess(sock, f"/w @{username} Перезагрузка бота")
-				break
-
-			for module in modulesList['modules']:
-				if modulesList['modules'][module]['enabled']:
-					execFunc = getattr(globals()[module], "execute")
-					ret = execFunc(message, username)
-					if ret != None:
-						utils.mess(sock, ret)
-						break
+			_thread.start_new_thread(execModule, (message,username,modulesList,sock,))
 
 			utils.logging_all(f"{username.strip()}: {message.strip()}")
 	return True
 
+def execModule(message, username, modulesList, sock):
+	for module in modulesList['modules']:
+		if modulesList['modules'][module]['enabled']:
+			execFunc = getattr(globals()[module], "execute")
+			ret = execFunc(message, username)
+			if ret != None:
+				utils.mess(sock, ret)
+				break
 
 def waitCLI(sock):
 	cliMsg = input(">")
