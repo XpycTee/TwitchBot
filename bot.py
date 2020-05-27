@@ -33,8 +33,6 @@ def reload_package(package):
                         reload_recursive_ex(module_child)
     return reload_recursive_ex(package)
 
-
-
 def main():
 	connected = False
 	while connected != True:
@@ -59,8 +57,6 @@ def main():
 	with open('modules.yml', 'w') as modulesFile:
 		modulesData = yaml.dump(modulesList, modulesFile)
 
-	
-
 	if utils.settings['logging']['file']:
 		if not 'log' in os.listdir():
 			os.mkdir('log')
@@ -70,7 +66,14 @@ def main():
 	_thread.start_new_thread(utils.fillOpList, ())
 	_thread.start_new_thread(utils.fillUsersList, ())
 	#_thread.start_new_thread(waitCLI, (sock,))
-
+	def execModule(message, username):
+		for module in modulesList['modules']:
+			if modulesList['modules'][module]['enabled']:
+				execFunc = getattr(globals()[module], "execute")
+				ret = execFunc(message, username)
+				if ret != None:
+					utils.mess(sock, ret)
+					break
 	while True:
 		response = sock.recv(1024).decode("utf-8")
 		if response == "PING :tmi.twitch.tv\r\n":
@@ -85,19 +88,12 @@ def main():
 					username = username
 			message = chat_message.sub("", response)
 
-			_thread.start_new_thread(execModule, (message,username,modulesList,sock,))
+			_thread.start_new_thread(execModule, (message,username,))
 
 			utils.logging_all(f"{username.strip()}: {message.strip()}")
 	return True
 
-def execModule(message, username, modulesList, sock):
-	for module in modulesList['modules']:
-		if modulesList['modules'][module]['enabled']:
-			execFunc = getattr(globals()[module], "execute")
-			ret = execFunc(message, username)
-			if ret != None:
-				utils.mess(sock, ret)
-				break
+
 
 def waitCLI(sock):
 	cliMsg = input(">")
