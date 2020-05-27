@@ -3,7 +3,9 @@ import json, requests, time, _thread
 import urllib.request as urllib
 from time import sleep
 
-import twitch_data as twitch 
+import twitch_data as twitch
+
+settings = {}
 
 def mess(sock, mess):
 	sock.send("PRIVMSG #{} :{}\r\n".format(twitch.CHAN, mess).encode("utf-8"))
@@ -28,6 +30,46 @@ def streamIsLive():
 		return True
 	else:
 		return False
+def logging_all(message):
+	logging_inFile(message)
+	logging_inLive(message)
+
+def logging_inLive(message):
+	if settings['logging']['live']:
+		timeNow = time.strftime("%H.%M.%S", time.localtime())
+		print(f"{timeNow} {message}")
+
+def logging_inFile(message):
+	if settings['logging']['file']:
+		today = datetime.datetime.today()
+		timeNow = time.strftime("%H.%M.%S", time.localtime())
+		with open(f'log\\log_{today.strftime("%Y-%m-%d")}.log', 'a', encoding='utf-8') as log_file:
+			log_file.write(f"{timeNow} {message}\n")
+
+def fillUsersList():
+	while True:
+		try:
+			url = f'http://tmi.twitch.tv/group/user/{twitch.CHAN}/chatters'
+			req = urllib.Request(url, headers={"accept": "*/*"})
+			res = urllib.urlopen(req).read()
+			twitch.userlist.clear()
+			data = json.loads(res) 
+			for p in data["chatters"]["viewers"]:
+				twitch.userlist[p] = {'display_name': reqAPItwitch(f'https://api.twitch.tv/kraken/users?login={p}')['users'][0]['display_name']}
+			for p in data["chatters"]["broadcaster"]:
+				twitch.userlist[p] = {'display_name': reqAPItwitch(f'https://api.twitch.tv/kraken/users?login={p}')['users'][0]['display_name']}
+			for p in data["chatters"]["moderators"]:
+				twitch.userlist[p] = {'display_name': reqAPItwitch(f'https://api.twitch.tv/kraken/users?login={p}')['users'][0]['display_name']}
+			for p in data["chatters"]["global_mods"]:
+				twitch.userlist[p] = {'display_name': reqAPItwitch(f'https://api.twitch.tv/kraken/users?login={p}')['users'][0]['display_name']}
+			for p in data["chatters"]["admins"]:
+				twitch.userlist[p] = {'display_name': reqAPItwitch(f'https://api.twitch.tv/kraken/users?login={p}')['users'][0]['display_name']}
+			for p in data["chatters"]["staff"]:
+				twitch.userlist[p] = {'display_name': reqAPItwitch(f'https://api.twitch.tv/kraken/users?login={p}')['users'][0]['display_name']}
+		except:
+			"Something went wrong...do nothing"
+			#logging_all("Something went wrong...do nothing")
+		sleep(5)
 
 def fillOpList():
 	while True:
@@ -38,7 +80,7 @@ def fillOpList():
 			twitch.oplist.clear()
 			data = json.loads(res) 
 			for p in data["chatters"]["broadcaster"]:
-				twitch.oplist[p] = "bcaster"
+				twitch.oplist[p] = "broadcaster"
 			for p in data["chatters"]["moderators"]:
 				twitch.oplist[p] = "mod"
 			for p in data["chatters"]["global_mods"]:
@@ -49,8 +91,9 @@ def fillOpList():
 				twitch.oplist[p] = "staff"
 		except:
 			"Something went wrong...do nothing"
+			#logging_all("Something went wrong...do nothing")
 		sleep(5)
 
 def isOp(user):
-	return user in twitch.oplist
+	return user.lower() in twitch.oplist
 

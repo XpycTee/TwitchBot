@@ -16,3 +16,4 @@ RATE = (20/30)
 API = data["twitch"]["irc-token"]
 
 oplist = {}
+userlist = {}

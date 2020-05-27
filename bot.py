@@ -1,4 +1,4 @@
-import sys, os, types, importlib, datetime, subprocess, time, _thread, ssl, socket, json, re, yaml
+import sys, os, types, importlib, datetime, subprocess, time, _thread, ssl, socket, re, json, yaml
 
 import urllib.request as urllib
 from time import sleep
@@ -33,6 +33,8 @@ def reload_package(package):
                         reload_recursive_ex(module_child)
     return reload_recursive_ex(package)
 
+
+
 def main():
 	connected = False
 	while connected != True:
@@ -40,7 +42,7 @@ def main():
 			sock = sock_connecting()
 			connected = True
 		except:
-			print("Нет соеденения")
+			utils.logging_all("Нет соеденения")
 			sleep(1)
 
 	modulesList = {}
@@ -57,17 +59,16 @@ def main():
 	with open('modules.yml', 'w') as modulesFile:
 		modulesData = yaml.dump(modulesList, modulesFile)
 
-	settings = {}
-	with open('config.yml') as configFile:
-		settings = yaml.load(configFile, Loader=yaml.FullLoader)['settings']
+	
 
-	if settings['logging']['file']:
+	if utils.settings['logging']['file']:
 		if not 'log' in os.listdir():
 			os.mkdir('log')
 
 	chat_message = re.compile(r"^:\w+!\w+@\w+\.tmi\.twitch\.tv PRIVMSG #\w+ :")
 
 	_thread.start_new_thread(utils.fillOpList, ())
+	_thread.start_new_thread(utils.fillUsersList, ())
 	#_thread.start_new_thread(waitCLI, (sock,))
 
 	while True:
@@ -77,11 +78,15 @@ def main():
 		else: 
 			username = re.search(r"\w+", response).group(0)
 			if username != 'tmi':
-				username = utils.reqAPItwitch(f'https://api.twitch.tv/kraken/users?login={username}')['users'][0]['display_name']
+				try:
+					username = twitch.userlist[username]['display_name']
+				except KeyError:
+					utils.logging_all(f"У {username} нету display_name")
+					username = username
 			message = chat_message.sub("", response)
 
 			if (message.strip() == "!reload" and utils.isOp(username)):
-				utils.mess(sock, "Перезагрузка бота")
+				utils.mess(sock, f"/w @{username} Перезагрузка бота")
 				break
 
 			for module in modulesList['modules']:
@@ -92,14 +97,9 @@ def main():
 						utils.mess(sock, ret)
 						break
 
-			if settings['logging']['live']:
-				print(f"{username.strip()}: {message.strip()}")
-			if settings['logging']['file']:
-				today = datetime.datetime.today()
-				with open(f'log\\chat_{today.strftime("%Y-%m-%d")}.log', 'a', encoding='utf-8') as log_file:
-					log_file.write(f"{username.strip()}: {message.strip()}\n")
-
+			utils.logging_all(f"{username.strip()}: {message.strip()}")
 	return True
+
 
 def waitCLI(sock):
 	cliMsg = input(">")
@@ -109,5 +109,7 @@ def waitCLI(sock):
 reloading = True
 while reloading:
 	if __name__ == "__main__":
+		with open('config.yml') as configFile:
+			utils.settings = yaml.load(configFile, Loader=yaml.FullLoader)['settings']
 		reload_package(modules)
 		reloading = main()
