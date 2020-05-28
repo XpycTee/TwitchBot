@@ -64,8 +64,7 @@ def main():
 	chat_message = re.compile(r"^:\w+!\w+@\w+\.tmi\.twitch\.tv PRIVMSG #\w+ :")
 
 	_thread.start_new_thread(utils.fillOpList, ())
-	_thread.start_new_thread(utils.fillUsersList, ())
-	#_thread.start_new_thread(waitCLI, (sock,))
+
 	def execModule(message, username):
 		for module in modulesList['modules']:
 			if modulesList['modules'][module]['enabled']:
@@ -83,22 +82,16 @@ def main():
 			if username != 'tmi':
 				try:
 					username = twitch.userlist[username]['display_name']
-				except KeyError:
-					utils.logging_all(f"У {username} нету display_name")
-					username = username
+				except:
+					pass
 			message = chat_message.sub("", response)
+
+			_thread.start_new_thread(utils.fillUsersList, (username,))
 
 			_thread.start_new_thread(execModule, (message,username,))
 
 			utils.logging_all(f"{username.strip()}: {message.strip()}")
 	return True
-
-
-
-def waitCLI(sock):
-	cliMsg = input(">")
-	utils.mess(sock, f"{cliMsg}")
-	waitCLI(sock)
 
 reloading = True
 while reloading:

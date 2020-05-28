@@ -46,30 +46,9 @@ def logging_inFile(message):
 		with open(f'log\\log_{today.strftime("%Y-%m-%d")}.log', 'a', encoding='utf-8') as log_file:
 			log_file.write(f"{timeNow} {message}\n")
 
-def fillUsersList():
-	while True:
-		try:
-			url = f'http://tmi.twitch.tv/group/user/{twitch.CHAN}/chatters'
-			req = urllib.Request(url, headers={"accept": "*/*"})
-			res = urllib.urlopen(req).read()
-			twitch.userlist.clear()
-			data = json.loads(res) 
-			for p in data["chatters"]["viewers"]:
-				twitch.userlist[p] = {'display_name': reqAPItwitch(f'https://api.twitch.tv/kraken/users?login={p}')['users'][0]['display_name']}
-			for p in data["chatters"]["broadcaster"]:
-				twitch.userlist[p] = {'display_name': reqAPItwitch(f'https://api.twitch.tv/kraken/users?login={p}')['users'][0]['display_name']}
-			for p in data["chatters"]["moderators"]:
-				twitch.userlist[p] = {'display_name': reqAPItwitch(f'https://api.twitch.tv/kraken/users?login={p}')['users'][0]['display_name']}
-			for p in data["chatters"]["global_mods"]:
-				twitch.userlist[p] = {'display_name': reqAPItwitch(f'https://api.twitch.tv/kraken/users?login={p}')['users'][0]['display_name']}
-			for p in data["chatters"]["admins"]:
-				twitch.userlist[p] = {'display_name': reqAPItwitch(f'https://api.twitch.tv/kraken/users?login={p}')['users'][0]['display_name']}
-			for p in data["chatters"]["staff"]:
-				twitch.userlist[p] = {'display_name': reqAPItwitch(f'https://api.twitch.tv/kraken/users?login={p}')['users'][0]['display_name']}
-		except:
-			"Something went wrong...do nothing"
-			#logging_all("Something went wrong...do nothing")
-		sleep(5)
+def fillUsersList(username):
+	if not username in twitch.userlist:
+		twitch.userlist[username] = {'display_name': reqAPItwitch(f'https://api.twitch.tv/kraken/users?login={username}')['users'][0]['display_name']}
 
 def fillOpList():
 	while True:
