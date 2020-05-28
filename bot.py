@@ -74,7 +74,12 @@ def main():
 					utils.mess(sock, ret)
 					break
 	while True:
-		response = sock.recv(1024).decode("utf-8")
+		sock.settimeout(360)
+		try:
+			response = sock.recv(1024).decode("utf-8")
+		except:
+			break
+		sock.settimeout(None)
 		if response == "PING :tmi.twitch.tv\r\n":
 			sock.send("PONG :tmi.twitch.tv\r\n".encode("utf-8"))
 		else: 
