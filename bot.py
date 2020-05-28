@@ -88,10 +88,9 @@ def main():
 				try:
 					username = twitch.userlist[username]['display_name']
 				except:
-					pass
-			message = chat_message.sub("", response)
+					_thread.start_new_thread(utils.fillUsersList, (username,))
 
-			_thread.start_new_thread(utils.fillUsersList, (username,))
+			message = chat_message.sub("", response)
 
 			_thread.start_new_thread(execModule, (message,username,))
 
