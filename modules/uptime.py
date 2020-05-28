@@ -20,7 +20,14 @@ def execute(message, username):
 			wordHours = declensionNumsRus(deltaHours, "час", "часа", "часов")
 			wordMinutes = declensionNumsRus(deltaMinutes, "минута", "минуты", "минут")
 
-			return f"@{username}, {deltaHours} {wordHours} {deltaMinutes} {wordMinutes} <3"
+			if deltaHours > 0:
+				hours = f"{deltaHours} {wordHours}"
+			if deltaMinutes > 0:
+				mins = f"{deltaMinutes} {wordMinutes}"
+			else:
+				mins = "ровно"
+
+			return f"@{username}, {hours} {mins} <3"
 		else:
 			return f"@{username}, на данный момент трансляция не идет <3"
 

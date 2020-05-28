@@ -69,6 +69,7 @@ def main():
 		for module in modulesList['modules']:
 			if modulesList['modules'][module]['enabled']:
 				execFunc = getattr(globals()[module], "execute")
+				username = utils.reqAPItwitch(f'https://api.twitch.tv/kraken/users?login={username}')['users'][0]['display_name']
 				ret = execFunc(message, username)
 				if ret != None:
 					utils.mess(sock, ret)
@@ -84,15 +85,11 @@ def main():
 			sock.send("PONG :tmi.twitch.tv\r\n".encode("utf-8"))
 		else: 
 			username = re.search(r"\w+", response).group(0)
-			if username != 'tmi':
-				try:
-					username = twitch.userlist[username]['display_name']
-				except:
-					_thread.start_new_thread(utils.fillUsersList, (username,))
 
 			message = chat_message.sub("", response)
-
-			_thread.start_new_thread(execModule, (message,username,))
+			
+			if username != "tmi":
+				_thread.start_new_thread(execModule, (message,username,))
 
 			utils.logging_all(f"{username.strip()}: {message.strip()}")
 	return True

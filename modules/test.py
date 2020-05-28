@@ -10,7 +10,7 @@ def execute(message, username):
 	if message.strip() == "!банкет":
 		return f"{username} накрыл стол для чатика из шашлычка, картошечки, грибочков и пыва panicBasket TakeNRG"
 	if message.strip() == "!смех":
-		return f"{username} ХаХа-ХаХа"
+		return f"{username} ХоХо-ХаХа"
 	if message.strip() == "!вогне":
 		return "grafoyniPls Deutschland, mein Herz in Flammen grafoyniPls"
 	checkHelloMess = message.lower()
@@ -31,6 +31,5 @@ def execute(message, username):
 			checkHelloMess.find("koncha") != -1 or 
 			checkHelloMess.find("VoHiYo") != -1 or 
 			checkHelloMess.find("hello") != -1)):
-		if username != "tmi":
-			sleep(2)
-			return f"Привет, @{username} KonCha <3"
+		sleep(2)
+		return f"Привет, @{username} KonCha <3"
