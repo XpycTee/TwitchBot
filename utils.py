@@ -1,4 +1,4 @@
-import json, requests, time, _thread, datetime
+import json, requests, time, _thread, datetime, os
 
 import urllib.request as urllib
 from time import sleep
@@ -9,6 +9,15 @@ settings = {}
 
 def mess(sock, mess):
 	sock.send("PRIVMSG #{} :{}\r\n".format(twitch.CHAN, mess).encode("utf-8"))
+
+def genModuleFolder(modName):
+	if not modName.replace('modules.', '') in os.listdir("modules"):
+		modFolderName = modName.replace('modules.', '')
+		os.mkdir(f"modules\\{modFolderName}")
+		return f"modules\\{modFolderName}"
+	else:
+		modFolderName = modName.replace('modules.', '')
+		return f"modules\\{modFolderName}"
 
 def reqAPItwitch(url):
 	req = ""
@@ -45,10 +54,6 @@ def logging_inFile(message):
 		timeNow = time.strftime("%H.%M.%S", time.localtime())
 		with open(f'log\\log_{today.strftime("%Y-%m-%d")}.log', 'a', encoding='utf-8') as log_file:
 			log_file.write(f"{timeNow} {message}\n")
-
-def fillUsersList(username):
-	if not username in twitch.userlist:
-		twitch.userlist[username] = {'display_name': reqAPItwitch(f'https://api.twitch.tv/kraken/users?login={username}')['users'][0]['display_name']}
 
 def fillOpList():
 	while True:
