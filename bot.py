@@ -1,4 +1,4 @@
-import sys, os, types, importlib, datetime, subprocess, time, _thread, ssl, socket, re, json, yaml
+import sys, os, types, importlib, datetime, subprocess, time, ssl, socket, re, json, yaml, threading
 
 import urllib.request as urllib
 from time import sleep
@@ -63,33 +63,52 @@ def main():
 
 	chat_message = re.compile(r"^:\w+!\w+@\w+\.tmi\.twitch\.tv PRIVMSG #\w+ :")
 
-	_thread.start_new_thread(utils.fillOpList, ())
+	fillOPThread = threading.Thread(target=utils.fillOpList)
+	fillOPThread.start()
+
+	for module in modulesList['modules']:
+		utils.logging_all(str(module))
+		if modulesList['modules'][module]['enabled']:
+			try:
+				execFunc = getattr(globals()[module], "starter")
+				execFThread = threading.Thread(target=execFunc)
+				execFThread.start()
+			except:
+				pass
 
 	def execModule(message, username):
 		for module in modulesList['modules']:
 			if modulesList['modules'][module]['enabled']:
-				execFunc = getattr(globals()[module], "execute")
+				execFunc = getattr(globals()[module], "responder")
 				username = utils.reqAPItwitch(f'https://api.twitch.tv/kraken/users?login={username}')['users'][0]['display_name']
 				ret = execFunc(message, username)
 				if ret != None:
 					utils.mess(sock, ret)
 					break
+
 	while True:
 		sock.settimeout(360)
 		try:
 			response = sock.recv(1024).decode("utf-8")
-		except:
+		except Exception as e:
+			utils.logging_all(str(e))
+			utils.logging_all(str(response))
 			break
 		sock.settimeout(None)
 		if response == "PING :tmi.twitch.tv\r\n":
 			sock.send("PONG :tmi.twitch.tv\r\n".encode("utf-8"))
 		else: 
-			username = re.search(r"\w+", response).group(0)
+			try:
+				username = re.search(r"\w+", response).group(0)
+				message = chat_message.sub("", response)
+			except Exception as e:
+				utils.logging_all(str(e))
+				utils.logging_all(str(response))
+				break
 
-			message = chat_message.sub("", response)
-			
 			if username != "tmi":
-				_thread.start_new_thread(execModule, (message,username,))
+				execMThread = threading.Thread(target=execModule, args=(message,username,))
+				execMThread.start()
 
 			utils.logging_all(f"{username.strip()}: {message.strip()}")
 	return True
