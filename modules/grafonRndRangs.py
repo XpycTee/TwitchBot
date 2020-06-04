@@ -1,6 +1,6 @@
 import sys, random
 
-def execute(message, username):
+def responder(message, username):
 	if  message.strip() == "!ранг" or message.strip() == "!rang":
 		if username == "tovarischcummissar":
 			return f"@{username} \"Генералиссимус\""
@@ -21,4 +21,4 @@ def execute(message, username):
 			'Генерал-полковник','Генерал-полковник','Генерал-полковник',
 			'Генерал стрима','Генерал стрима',
 			'Маршал стрима']
-			return f"@{username} получил звание \"{random.choice(rangs)}\""
+			return f"{username} получил звание \"{random.choice(rangs)}\""

@@ -2,9 +2,9 @@ import sys
 from time import sleep
 from random import randint
 
-def execute(message, username):
+def responder(message, username):
 	if message.strip() == "!hi":
-		return f"Привет, @{username} KonCha <3"
+		return f"Привет, {username} KonCha <3"
 	if message.strip() == "!roll":
 		return f"{username} выкинул: {str(randint(1, 6))}"
 	if message.strip() == "!банкет":
@@ -32,4 +32,4 @@ def execute(message, username):
 			checkHelloMess.find("VoHiYo") != -1 or 
 			checkHelloMess.find("hello") != -1)):
 		sleep(2)
-		return f"Привет, @{username} KonCha <3"
+		return f"Привет, {username} KonCha <3"

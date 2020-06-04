@@ -2,7 +2,7 @@ import sys, datetime
 
 import utils
 
-def execute(message, username):
+def responder(message, username):
 	message = message.lower()
 	if (message.strip() == "!uptime" or message.strip() == "!time" or message.strip() == "!время" or (message.find("сколько") != -1 and (message.find("идёт") != -1 or message.find("идет") != -1 or message.find("длится") != -1) and message.find("стрим") != -1)):
 		if utils.streamIsLive():
@@ -22,14 +22,16 @@ def execute(message, username):
 
 			if deltaHours > 0:
 				hours = f"{deltaHours} {wordHours}"
+			else:
+				hours = ""
 			if deltaMinutes > 0:
 				mins = f"{deltaMinutes} {wordMinutes}"
 			else:
 				mins = "ровно"
 
-			return f"@{username}, {hours} {mins} <3"
+			return f"{username}, {hours} {mins} <3"
 		else:
-			return f"@{username}, на данный момент трансляция не идет <3"
+			return f"{username}, стрим будет через час <3"
 
 def declensionNumsRus(number, singlNomin, singlGeni, pluralGeni):
 	""" 
