@@ -3,81 +3,97 @@ import json, requests, time, _thread, datetime, os
 import urllib.request as urllib
 from time import sleep
 
-import twitch_data as twitch
+import Data
 
-settings = {}
+class Chat(object):
+	"""Class of Chat on Stream"""
+	
+	class Users(object):
+		"""Users in chat object"""
+		def isOp(user):
+			"""Checking whether the user is an Op"""
+			return user.lower() in Data.Twitch.oplist
 
-def mess(sock, mess):
-	sock.send("PRIVMSG #{} :{}\r\n".format(twitch.CHAN, mess).encode("utf-8"))
+	def sendMessage(sock, mess):
+		"""Sending message in chat"""
+		sock.send("PRIVMSG #{} :{}\r\n".format(Data.Twitch.CHAN, mess).encode("utf-8"))
 
-def genModuleFolder(modName):
-	if not modName.replace('modules.', '') in os.listdir("modules"):
-		modFolderName = modName.replace('modules.', '')
-		os.mkdir(f"modules\\{modFolderName}")
-		return f"modules\\{modFolderName}"
-	else:
-		modFolderName = modName.replace('modules.', '')
-		return f"modules\\{modFolderName}"
+class Stream(object):
+	""" class of Stream on Twitch """
 
-def reqAPItwitch(url):
-	req = ""
-	if twitch.API != "":
-		req = requests.get(url, headers = {"Authorization" : f"OAuth {twitch.PASS}", "Accept" : "application/vnd.twitchtv.v5+json"})
-	else:
-		req = requests.get(url, headers = {"Client-ID" : twitch.API, "Accept" : "application/vnd.twitchtv.v5+json"})
-	req.raise_for_status()
-	return req.json()
+	def isLive():
+		"""Get Stream Status"""
+		stream = Stream.requestData()
+		#Bot.logging_all(stream)
+		if stream["stream"] != None:
+			return True
+		else:
+			return False
 
-def reqStreamData():
-	userID = reqAPItwitch(f'https://api.twitch.tv/kraken/users?login={twitch.CHAN}')['users'][0]['_id']
-	url = f'https://api.twitch.tv/kraken/streams/{userID}'
-	return reqAPItwitch(url)
+	def requestData():
+		"""Request Stream Data from Twitch Kraken API"""
+		url = f'https://api.twitch.tv/kraken/streams/{Data.Stream.channel_ID}'
+		return TwitchAPI.request(url)
 
-def streamIsLive():
-	stream = reqStreamData()["stream"]
-	if stream != None:
-		return True
-	else:
-		return False
-def logging_all(message):
-	logging_inFile(message)
-	logging_inLive(message)
+class Bot(object):
+	def gen_moduleFolder(modName):
+		if not modName.replace('modules.', '') in os.listdir("modules"):
+			modFolderName = modName.replace('modules.', '')
+			os.mkdir(f"modules\\{modFolderName}")
+			return f"modules\\{modFolderName}"
+		else:
+			modFolderName = modName.replace('modules.', '')
+			return f"modules\\{modFolderName}"
+	
+	def logging_all(message):
+		Bot.logging_inFile(message)
+		Bot.logging_inLive(message)
+	
+	def logging_inLive(message):
+		if Data.Bot.settings['logging']['live']:
+			timeNow = time.strftime("%H.%M.%S", time.localtime())
+			print(f"{timeNow} {message}")
+	
+	def logging_inFile(message):
+		if Data.Bot.settings['logging']['file']:
+			today = datetime.datetime.today()
+			timeNow = time.strftime("%H.%M.%S", time.localtime())
+			with open(f'log\\log_{today.strftime("%Y-%m-%d")}.log', 'a', encoding='utf-8') as log_file:
+				log_file.write(f"{timeNow} {message}\n")
+	
+	def fill_opList():
+		while True:
+			try:
+				url = f'http://tmi.twitch.tv/group/user/{Data.Twitch.CHAN}/chatters'
+				req = urllib.Request(url, headers={"accept": "*/*"})
+				res = urllib.urlopen(req).read()
+				Data.Twitch.oplist.clear()
+				data = json.loads(res) 
+				for p in data["chatters"]["broadcaster"]:
+					Data.Twitch.oplist[p] = "broadcaster"
+				for p in data["chatters"]["moderators"]:
+					Data.Twitch.oplist[p] = "mod"
+				for p in data["chatters"]["global_mods"]:
+					Data.Twitch.oplist[p] = "global_mods"
+				for p in data["chatters"]["admins"]:
+					Data.Twitch.oplist[p] = "admins"
+				for p in data["chatters"]["staff"]:
+					Data.Twitch.oplist[p] = "staff"
+			except:
+				"Something went wrong...do nothing"
+				#logging_all("Something went wrong...do nothing")
+			sleep(5)
 
-def logging_inLive(message):
-	if settings['logging']['live']:
-		timeNow = time.strftime("%H.%M.%S", time.localtime())
-		print(f"{timeNow} {message}")
+class TwitchAPI(object):
+	def request(url):
+		req = ""
+		#os.environ['no_proxy'] = '127.0.0.1,localhost'
+		if Data.Twitch.API == "":
+			req = requests.get(url, headers = {"Authorization" : f"OAuth {Data.Twitch.PASS}", "Accept" : "application/vnd.twitchtv.v5+json"})
+		else:
+			req = requests.get(url, headers = {"Client-ID" : Data.Twitch.API, "Accept" : "application/vnd.twitchtv.v5+json"})
+		req.raise_for_status()
+		return req.json()
 
-def logging_inFile(message):
-	if settings['logging']['file']:
-		today = datetime.datetime.today()
-		timeNow = time.strftime("%H.%M.%S", time.localtime())
-		with open(f'log\\log_{today.strftime("%Y-%m-%d")}.log', 'a', encoding='utf-8') as log_file:
-			log_file.write(f"{timeNow} {message}\n")
 
-def fillOpList():
-	while True:
-		try:
-			url = f'http://tmi.twitch.tv/group/user/{twitch.CHAN}/chatters'
-			req = urllib.Request(url, headers={"accept": "*/*"})
-			res = urllib.urlopen(req).read()
-			twitch.oplist.clear()
-			data = json.loads(res) 
-			for p in data["chatters"]["broadcaster"]:
-				twitch.oplist[p] = "broadcaster"
-			for p in data["chatters"]["moderators"]:
-				twitch.oplist[p] = "mod"
-			for p in data["chatters"]["global_mods"]:
-				twitch.oplist[p] = "global_mods"
-			for p in data["chatters"]["admins"]:
-				twitch.oplist[p] = "admins"
-			for p in data["chatters"]["staff"]:
-				twitch.oplist[p] = "staff"
-		except:
-			"Something went wrong...do nothing"
-			#logging_all("Something went wrong...do nothing")
-		sleep(5)
-
-def isOp(user):
-	return user.lower() in twitch.oplist
 

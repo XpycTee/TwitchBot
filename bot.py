@@ -3,17 +3,17 @@ import sys, os, types, importlib, datetime, subprocess, time, ssl, socket, re, j
 import urllib.request as urllib
 from time import sleep
 
-import twitch_data as twitch
-import modules, utils
+import Data
+import modules, Utils
 from modules import *
 
 def sock_connecting():
 	tcp_sock = socket.socket()
 	ssl_sock = ssl.wrap_socket(tcp_sock)
-	ssl_sock.connect((twitch.HOST, twitch.PORT))
-	ssl_sock.send("PASS oauth:{}\r\n".format(twitch.PASS).encode("utf-8"))
-	ssl_sock.send("NICK {}\r\n".format(twitch.NICK).encode("utf-8"))
-	ssl_sock.send("JOIN #{}\r\n".format(twitch.CHAN).encode("utf-8"))
+	ssl_sock.connect((Data.Twitch.HOST, Data.Twitch.PORT))
+	ssl_sock.send("PASS oauth:{}\r\n".format(Data.Twitch.PASS).encode("utf-8"))
+	ssl_sock.send("NICK {}\r\n".format(Data.Twitch.NICK).encode("utf-8"))
+	ssl_sock.send("JOIN #{}\r\n".format(Data.Twitch.CHAN).encode("utf-8"))
 	return ssl_sock
 
 def reload_package(package):
@@ -40,7 +40,7 @@ def main():
 			sock = sock_connecting()
 			connected = True
 		except:
-			utils.logging_all("Нет соеденения")
+			Utils.Bot.logging_all("Нет соеденения")
 			sleep(1)
 
 	modulesList = {}
@@ -57,17 +57,19 @@ def main():
 	with open('modules.yml', 'w') as modulesFile:
 		modulesData = yaml.dump(modulesList, modulesFile)
 
-	if utils.settings['logging']['file']:
+	if Data.Bot.settings['logging']['file']:
 		if not 'log' in os.listdir():
 			os.mkdir('log')
 
 	chat_message = re.compile(r"^:\w+!\w+@\w+\.tmi\.twitch\.tv PRIVMSG #\w+ :")
 
-	fillOPThread = threading.Thread(target=utils.fillOpList)
+	fillOPThread = threading.Thread(target=Utils.Bot.fill_opList)
 	fillOPThread.start()
 
+	Data.Stream.channel_ID = Utils.TwitchAPI.request(f'https://api.twitch.tv/kraken/users?login={Data.Twitch.CHAN}')['users'][0]['_id']
+	
 	for module in modulesList['modules']:
-		utils.logging_all(str(module))
+		Utils.Bot.logging_all(str(module))
 		if modulesList['modules'][module]['enabled']:
 			try:
 				execFunc = getattr(globals()[module], "starter")
@@ -79,11 +81,15 @@ def main():
 	def execModule(message, username):
 		for module in modulesList['modules']:
 			if modulesList['modules'][module]['enabled']:
-				execFunc = getattr(globals()[module], "responder")
-				username = utils.reqAPItwitch(f'https://api.twitch.tv/kraken/users?login={username}')['users'][0]['display_name']
-				ret = execFunc(message, username)
-				if ret != None:
-					utils.mess(sock, ret)
+				try:
+					execFunc = getattr(globals()[module], "responder")
+				except AttributeError:
+					break
+				username = Utils.TwitchAPI.request(f'https://api.twitch.tv/kraken/users?login={username}')['users'][0]['display_name']
+				ret = f"/me {execFunc(message, username)}"
+				if ret != f"/me {None}":
+					Utils.Chat.sendMessage(sock, ret)
+					Utils.Bot.logging_all(f"BOT(respond): {ret}")
 					break
 
 	while True:
@@ -91,8 +97,8 @@ def main():
 		try:
 			response = sock.recv(1024).decode("utf-8")
 		except Exception as e:
-			utils.logging_all(str(e))
-			utils.logging_all(str(response))
+			Utils.Bot.logging_all(str(e))
+			Utils.Bot.logging_all(str(response))
 			break
 		sock.settimeout(None)
 		if response == "PING :tmi.twitch.tv\r\n":
@@ -102,21 +108,24 @@ def main():
 				username = re.search(r"\w+", response).group(0)
 				message = chat_message.sub("", response)
 			except Exception as e:
-				utils.logging_all(str(e))
-				utils.logging_all(str(response))
+				Utils.Bot.logging_all(str(e))
+				Utils.Bot.logging_all(str(response))
 				break
 
 			if username != "tmi":
 				execMThread = threading.Thread(target=execModule, args=(message,username,))
 				execMThread.start()
 
-			utils.logging_all(f"{username.strip()}: {message.strip()}")
+			Utils.Bot.logging_all(f"{username.strip()}: {message.strip()}")
+			if Utils.Stream.isLive():
+				Data.Chat.countMessages["OnCurrentStream"] += 1
+			Data.Chat.countMessages["AllTime"] += 1
 	return True
 
 reloading = True
 while reloading:
 	if __name__ == "__main__":
 		with open('config.yml') as configFile:
-			utils.settings = yaml.load(configFile, Loader=yaml.FullLoader)['settings']
+			Data.Bot.settings = yaml.load(configFile, Loader=yaml.FullLoader)['settings']
 		reload_package(modules)
 		reloading = main()
