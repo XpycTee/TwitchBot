@@ -22,6 +22,8 @@ class Twitch(object):
 
 class Chat(object):
 	countMessages = { "OnCurrentStream" : 0, "AllTime" : 0 }
+	historyMessages = list()
+	emotes = {}
 	def __init__(self):
 		"""Constructor"""
 		pass

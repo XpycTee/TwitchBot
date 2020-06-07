@@ -87,7 +87,6 @@ class Bot(object):
 class TwitchAPI(object):
 	def request(url):
 		req = ""
-		#os.environ['no_proxy'] = '127.0.0.1,localhost'
 		if Data.Twitch.API == "":
 			req = requests.get(url, headers = {"Authorization" : f"OAuth {Data.Twitch.PASS}", "Accept" : "application/vnd.twitchtv.v5+json"})
 		else:

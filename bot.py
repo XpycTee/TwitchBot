@@ -67,6 +67,41 @@ def main():
 	fillOPThread.start()
 
 	Data.Stream.channel_ID = Utils.TwitchAPI.request(f'https://api.twitch.tv/kraken/users?login={Data.Twitch.CHAN}')['users'][0]['_id']
+
+	def loadEmotIcons():
+		url = f'https://api.frankerfacez.com/v1/room/{Data.Twitch.CHAN}'
+		req = urllib.Request(url, headers={"accept": "*/*"})
+		res = urllib.urlopen(req).read().decode("utf-8")
+		FFacezJSON = json.loads(res)
+
+		FFacezList = FFacezJSON["sets"][str(FFacezJSON["room"]["set"])]["emoticons"]
+
+		for FFZemIcon in FFacezList:
+			Data.Chat.emotes.update({ FFZemIcon["name"] : { "type" : "FrankerFaceZ" }})
+
+		Utils.Bot.logging_all("FrankerFaceZ emoticons Data Loaded")
+
+		url = f'https://twitch.center/customapi/bttvemotes?channel={Data.Twitch.CHAN}'
+		req = urllib.Request(url, headers={"accept": "*/*"})
+		res = urllib.urlopen(req).read().decode("utf-8")
+		if res != "channel not found":
+			bttvList = res.split(" ")
+			for BTTVemIcon in bttvList:
+				Data.Chat.emotes.update({ BTTVemIcon : { "type" : "BTTV" }})
+			Utils.Bot.logging_all("BTTV emoticons Data Loaded")
+		else:
+			Utils.Bot.logging_all("BTTV emoticons Data not loaded: Channel not found")
+
+		emoticonsTwitch = Utils.TwitchAPI.request("https://api.twitch.tv/kraken/chat/emoticons")
+		for emIcon in emoticonsTwitch["emoticons"]:
+			Data.Chat.emotes.update({emIcon["regex"] : { "type" : "Global" }})# "id": emIcon["id"], "images": emIcon["images"] } })
+		emoticonsTwitch.clear()
+		
+		Utils.Bot.logging_all("Global Twitch emoticons Data Loaded")
+
+	lEIThread = threading.Thread(target=loadEmotIcons)
+	lEIThread.start()
+	
 	
 	for module in modulesList['modules']:
 		Utils.Bot.logging_all(str(module))
@@ -86,9 +121,9 @@ def main():
 				except AttributeError:
 					break
 				username = Utils.TwitchAPI.request(f'https://api.twitch.tv/kraken/users?login={username}')['users'][0]['display_name']
-				ret = f"/me {execFunc(message, username)}"
-				if ret != f"/me {None}":
-					Utils.Chat.sendMessage(sock, ret)
+				ret = execFunc(message, username)
+				if ret != None:
+					Utils.Chat.sendMessage(sock, f"/me {ret}")
 					Utils.Bot.logging_all(f"BOT(respond): {ret}")
 					break
 
@@ -117,9 +152,14 @@ def main():
 				execMThread.start()
 
 			Utils.Bot.logging_all(f"{username.strip()}: {message.strip()}")
+
+
 			if Utils.Stream.isLive():
 				Data.Chat.countMessages["OnCurrentStream"] += 1
 			Data.Chat.countMessages["AllTime"] += 1
+			if len(Data.Chat.historyMessages) >= 100:
+				Data.Chat.historyMessages.pop(0)
+			Data.Chat.historyMessages.append(message.strip())
 	return True
 
 reloading = True
