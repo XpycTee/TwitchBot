@@ -1,4 +1,4 @@
-import sys, os, types, importlib, datetime, subprocess, time, ssl, socket, re, json, yaml, threading
+import sys, os, types, importlib, datetime, subprocess, time, ssl, socket, re, json, yaml, threading, requests
 
 import urllib.request as urllib
 from time import sleep
@@ -69,35 +69,45 @@ def main():
 	Data.Stream.channel_ID = Utils.TwitchAPI.request(f'https://api.twitch.tv/kraken/users?login={Data.Twitch.CHAN}')['users'][0]['_id']
 
 	def loadEmotIcons():
-		url = f'https://api.frankerfacez.com/v1/room/{Data.Twitch.CHAN}'
-		req = urllib.Request(url, headers={"accept": "*/*"})
+		
+		url = f'https://api.frankerfacez.com/v1/set/global'
+		req = urllib.Request(url, headers={"accept": "application/json"})
 		res = urllib.urlopen(req).read().decode("utf-8")
-		FFacezJSON = json.loads(res)
-
-		FFacezList = FFacezJSON["sets"][str(FFacezJSON["room"]["set"])]["emoticons"]
-
-		for FFZemIcon in FFacezList:
+		globsFFacezJSON = json.loads(res)
+		globsFFacezList = globsFFacezJSON["sets"][str(globsFFacezJSON["default_sets"][0])]["emoticons"]
+		for FFZemIcon in globsFFacezList:
 			Data.Chat.emotes.update({ FFZemIcon["name"] : { "type" : "FrankerFaceZ" }})
 
+		url = f'https://api.frankerfacez.com/v1/room/{Data.Twitch.CHAN}'
+		req = urllib.Request(url, headers={"accept": "application/json"})
+		res = urllib.urlopen(req).read().decode("utf-8")
+		FFacezJSON = json.loads(res)
+		FFacezList = FFacezJSON["sets"][str(FFacezJSON["room"]["set"])]["emoticons"]
+		for FFZemIcon in FFacezList:
+			Data.Chat.emotes.update({ FFZemIcon["name"] : { "type" : "FrankerFaceZ" }})
 		Utils.Bot.logging_all("FrankerFaceZ emoticons Data Loaded")
 
-		url = f'https://twitch.center/customapi/bttvemotes?channel={Data.Twitch.CHAN}'
-		req = urllib.Request(url, headers={"accept": "*/*"})
+		url = "https://api.betterttv.net/2/emotes"
+		req = urllib.Request(url, headers={"accept": "application/json"})
 		res = urllib.urlopen(req).read().decode("utf-8")
-		if res != "channel not found":
-			bttvList = res.split(" ")
-			for BTTVemIcon in bttvList:
-				Data.Chat.emotes.update({ BTTVemIcon : { "type" : "BTTV" }})
-			Utils.Bot.logging_all("BTTV emoticons Data Loaded")
-		else:
-			Utils.Bot.logging_all("BTTV emoticons Data not loaded: Channel not found")
+		globsBTTVList = json.loads(res)["emotes"]
+		for BTTVemIcon in globsBTTVList:
+			Data.Chat.emotes.update({ BTTVemIcon["code"] : { "type" : "BTTV" }})
+		
+		url = f'https://api.betterttv.net/2/channels/{Data.Twitch.CHAN}'
+		req = urllib.Request(url, headers={"accept": "application/json"})
+		res = urllib.urlopen(req).read().decode("utf-8")
+		bttvList = json.loads(res)["emotes"]
+		for BTTVemIcon in bttvList:
+			Data.Chat.emotes.update({ BTTVemIcon["code"] : { "type" : "BTTV" }})
+		Utils.Bot.logging_all("BTTV emoticons Data Loaded")
 
 		emoticonsTwitch = Utils.TwitchAPI.request("https://api.twitch.tv/kraken/chat/emoticons")
 		for emIcon in emoticonsTwitch["emoticons"]:
-			Data.Chat.emotes.update({emIcon["regex"] : { "type" : "Global" }})# "id": emIcon["id"], "images": emIcon["images"] } })
+			Data.Chat.emotes.update({emIcon["regex"] : { "type" : "Twitch" }})# "id": emIcon["id"], "images": emIcon["images"] } })
 		emoticonsTwitch.clear()
 		
-		Utils.Bot.logging_all("Global Twitch emoticons Data Loaded")
+		Utils.Bot.logging_all("All Twitch emoticons Data Loaded")
 
 	lEIThread = threading.Thread(target=loadEmotIcons)
 	lEIThread.start()
