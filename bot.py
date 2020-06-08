@@ -69,35 +69,28 @@ def main():
 	Data.Stream.channel_ID = Utils.TwitchAPI.request(f'https://api.twitch.tv/kraken/users?login={Data.Twitch.CHAN}')['users'][0]['_id']
 
 	def loadEmotIcons():
-		
-		url = f'https://api.frankerfacez.com/v1/set/global'
-		req = urllib.Request(url, headers={"accept": "application/json"})
-		res = urllib.urlopen(req).read().decode("utf-8")
-		globsFFacezJSON = json.loads(res)
+		def urlRequest(url, headers = {"accept": "application/json"}):
+			request = urllib.Request(url, headers=headers)
+			response = urllib.urlopen(request).read().decode("utf-8")
+			return response
+
+		globsFFacezJSON = json.loads(urlRequest('https://api.frankerfacez.com/v1/set/global'))
 		globsFFacezList = globsFFacezJSON["sets"][str(globsFFacezJSON["default_sets"][0])]["emoticons"]
 		for FFZemIcon in globsFFacezList:
 			Data.Chat.emotes.update({ FFZemIcon["name"] : { "type" : "FrankerFaceZ" }})
 
-		url = f'https://api.frankerfacez.com/v1/room/{Data.Twitch.CHAN}'
-		req = urllib.Request(url, headers={"accept": "application/json"})
-		res = urllib.urlopen(req).read().decode("utf-8")
-		FFacezJSON = json.loads(res)
+		FFacezJSON = json.loads(urlRequest(f'https://api.frankerfacez.com/v1/room/{Data.Twitch.CHAN}'))
 		FFacezList = FFacezJSON["sets"][str(FFacezJSON["room"]["set"])]["emoticons"]
 		for FFZemIcon in FFacezList:
 			Data.Chat.emotes.update({ FFZemIcon["name"] : { "type" : "FrankerFaceZ" }})
+
 		Utils.Bot.logging_all("FrankerFaceZ emoticons Data Loaded")
 
-		url = "https://api.betterttv.net/2/emotes"
-		req = urllib.Request(url, headers={"accept": "application/json"})
-		res = urllib.urlopen(req).read().decode("utf-8")
-		globsBTTVList = json.loads(res)["emotes"]
+		globsBTTVList = json.loads(urlRequest("https://api.betterttv.net/2/emotes"))["emotes"]
 		for BTTVemIcon in globsBTTVList:
 			Data.Chat.emotes.update({ BTTVemIcon["code"] : { "type" : "BTTV" }})
 		
-		url = f'https://api.betterttv.net/2/channels/{Data.Twitch.CHAN}'
-		req = urllib.Request(url, headers={"accept": "application/json"})
-		res = urllib.urlopen(req).read().decode("utf-8")
-		bttvList = json.loads(res)["emotes"]
+		bttvList = json.loads(urlRequest(f'https://api.betterttv.net/2/channels/{Data.Twitch.CHAN}'))["emotes"]
 		for BTTVemIcon in bttvList:
 			Data.Chat.emotes.update({ BTTVemIcon["code"] : { "type" : "BTTV" }})
 		Utils.Bot.logging_all("BTTV emoticons Data Loaded")
@@ -106,7 +99,6 @@ def main():
 		for emIcon in emoticonsTwitch["emoticons"]:
 			Data.Chat.emotes.update({emIcon["regex"] : { "type" : "Twitch" }})# "id": emIcon["id"], "images": emIcon["images"] } })
 		emoticonsTwitch.clear()
-		
 		Utils.Bot.logging_all("All Twitch emoticons Data Loaded")
 
 	lEIThread = threading.Thread(target=loadEmotIcons)
@@ -130,8 +122,12 @@ def main():
 					execFunc = getattr(globals()[module], "responder")
 				except AttributeError:
 					break
-				username = Utils.TwitchAPI.request(f'https://api.twitch.tv/kraken/users?login={username}')['users'][0]['display_name']
-				ret = execFunc(message, username)
+
+				if not username in Data.Chat.userlist:
+					disp_name = Utils.TwitchAPI.request(f'https://api.twitch.tv/kraken/users?login={username}')['users'][0]['display_name']
+					Data.Chat.userlist.update({ username : { "display_name" : disp_name } })
+				diplay_username = Data.Chat.userlist[username]['display_name']
+				ret = execFunc(message, diplay_username)
 				if ret != None:
 					Utils.Chat.sendMessage(sock, f"/me {ret}")
 					Utils.Bot.logging_all(f"BOT(respond): {ret}")
@@ -157,19 +153,19 @@ def main():
 				Utils.Bot.logging_all(str(response))
 				break
 
-			if username != "tmi":
+			if username != "tmi" and username != Data.Twitch.NICK.lower():
 				execMThread = threading.Thread(target=execModule, args=(message,username,))
 				execMThread.start()
 
 			Utils.Bot.logging_all(f"{username.strip()}: {message.strip()}")
 
-
-			if Utils.Stream.isLive():
-				Data.Chat.countMessages["OnCurrentStream"] += 1
-			Data.Chat.countMessages["AllTime"] += 1
-			if len(Data.Chat.historyMessages) >= 100:
-				Data.Chat.historyMessages.pop(0)
-			Data.Chat.historyMessages.append(message.strip())
+			if username != "tmi" and username != Data.Twitch.NICK.lower():
+				if Utils.Stream.isLive():
+					Data.Chat.countMessages["OnCurrentStream"] += 1
+				Data.Chat.countMessages["AllTime"] += 1
+				if len(Data.Chat.historyMessages) >= 100:
+					Data.Chat.historyMessages.pop(0)
+				Data.Chat.historyMessages.append(message.strip())
 	return True
 
 reloading = True

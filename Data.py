@@ -14,7 +14,6 @@ class Twitch(object):
 	API = data["api-token"]
 
 	oplist = {}
-	userlist = {}
 
 	def __init__(self):
 		"""Constructor"""
@@ -24,6 +23,7 @@ class Chat(object):
 	countMessages = { "OnCurrentStream" : 0, "AllTime" : 0 }
 	historyMessages = list()
 	emotes = {}
+	userlist = {}
 	def __init__(self):
 		"""Constructor"""
 		pass
