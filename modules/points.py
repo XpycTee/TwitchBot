@@ -4,6 +4,11 @@ import urllib.request as urllib
 
 import Utils, Data
 
+#For Russian lang
+singlNomin = "понит" #1 поинт
+singlGeni = "поинта" #2 поинта
+pluralGeni = "поинтов" #5 поинтов
+
 def starter():
 	usersList = {}
 	folderPath = Utils.Bot.gen_moduleFolder(__name__)
@@ -36,6 +41,8 @@ def starter():
 
 
 def responder(message, username):
+	def declPoints(num):
+		return Utils.declensionNumsRus(num, singlNomin, singlGeni, pluralGeni)
 
 	def updateUserListFile(usersList):
 		with open(f'modules\\points\\users.yml', 'w') as chatUsers:
@@ -53,7 +60,7 @@ def responder(message, username):
 		updateUserListFile(usersList)
 
 	if (message.strip() == "!points"):
-		return f"{username}, {usersList[username.lower()]['points']} поинтов"
+		return f"{username}, {usersList[username.lower()]['points']} {declPoints(usersList[username.lower()]['points'])}"
 
 	if (message.startswith("!give")):
 		splitedMsg = message.strip().split(" ")
@@ -69,7 +76,7 @@ def responder(message, username):
 			if toWhom.lower() in usersList:
 				usersList[toWhom.lower()]["points"] += howMany
 				updateUserListFile(usersList)
-				return f"{username}, перевел {howMany} поинтов {toWhom} PogChamp"
+				return f"{username}, перевел {howMany} {declPoints(howMany)} {toWhom} PogChamp"
 			else:
 				return f"{username}, такого пользователся в чате нет"
 
@@ -77,13 +84,13 @@ def responder(message, username):
 			return f"{username}, вы не можете перевести поинты самому себе"
 
 		if usersList[username.lower()]['points'] < howMany:
-			return f"{username}, у вас всего {usersList[username.lower()]['points']}"
+			return f"{username}, у вас всего {usersList[username.lower()]['points']} {declPoints(usersList[username.lower()]['points'])}"
 
 		if toWhom.lower() in usersList:
 			usersList[username.lower()]['points'] -= howMany
 			usersList[toWhom.lower()]["points"] += howMany
 			updateUserListFile(usersList)
-			return f"{username}, перевел {howMany} поинтов {toWhom} PogChamp"
+			return f"{username}, перевел {howMany}  {declPoints(howMany)} {toWhom} PogChamp"
 		else:
 			return f"{username}, такого пользователся в чате нет"
 
@@ -100,12 +107,18 @@ def responder(message, username):
 			return f"{username}, не ввел сумму"
 
 		if usersList[username.lower()]['points'] < howMany:
-			return f"{username}, у вас всего {usersList[username.lower()]['points']}"
+			return f"{username}, у вас всего {usersList[username.lower()]['points']} {declPoints(usersList[username.lower()]['points'])}"
 		if random.choice([True, False]):
 			usersList[username.lower()]['points'] += howMany
 			updateUserListFile(usersList)
-			return f"{username} выиграл {howMany} поинтов в рулетке и сейчас имеет {usersList[username.lower()]['points']} поинтов!"
+			if splitedMsg[1] == "all":
+				return f"PogChamp {username} пошел ва-банк и выиграл {howMany} {declPoints(howMany)} PogChamp в рулетке и сейчас имеет {usersList[username.lower()]['points']} {declPoints(usersList[username.lower()]['points'])} FeelsGoodMan"
+			else:
+				return f"{username} выиграл {howMany} {declPoints(howMany)} в рулетке и сейчас имеет {usersList[username.lower()]['points']} {declPoints(usersList[username.lower()]['points'])}! FeelsGoodMan"
 		else:
 			usersList[username.lower()]['points'] -= howMany
 			updateUserListFile(usersList)
-			return f"{username} проиграл {howMany} поинтов в рулетке и сейчас имеет {usersList[username.lower()]['points']} поинтов!"
+			if splitedMsg[1] == "all":
+				return f"{username} пошел ва-банк и потерял все {howMany} {declPoints(howMany)} LUL"
+			else:
+				return f"{username} проиграл {howMany} {declPoints(howMany)} в рулетке и сейчас имеет {usersList[username.lower()]['points']} {declPoints(usersList[username.lower()]['points'])}! FeelsBadMan"
