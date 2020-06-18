@@ -11,44 +11,45 @@ pluralGeni = "поинтов" #5 поинтов
 
 def starter():
 	usersList = {}
-	folderPath = Utils.Bot.gen_moduleFolder(__name__)
+	folderPath = Utils.Bot.moduleFolder(__name__)
 	if not f'users.yml' in os.listdir(folderPath):
 		with open(f'{folderPath}\\users.yml', 'w') as chatUsers:
 			chatUsersData = yaml.dump(usersList, chatUsers)
 	
-	while True:
+	while Utils.Stream.isLive():
 		try:
-			if Utils.Stream.isLive():
-				url = f'http://tmi.twitch.tv/group/user/{Data.Twitch.CHAN}/chatters'
-				req = urllib.Request(url, headers={"accept": "*/*"})
-				res = urllib.urlopen(req).read()
-				chattersData = json.loads(res)["chatters"]
-				with open(f'{folderPath}\\users.yml') as usersFile:
-					usersList = yaml.load(usersFile, Loader=yaml.FullLoader)
-				for user in usersList:
-					if (user in chattersData["broadcaster"] or 
-						user in chattersData["moderators"] or 
-						user in chattersData["global_mods"] or 
-						user in chattersData["admins"] or 
-						user in chattersData["staff"] or 
-						user in chattersData["viewers"]):
-							usersList[user]["points"] += 100 
-							with open(f'{folderPath}\\users.yml', 'w') as chatUsers:
-								chatUsersData = yaml.dump(usersList, chatUsers)
+			url = f'http://tmi.twitch.tv/group/user/{Data.Twitch.CHAN}/chatters'
+			req = urllib.Request(url, headers={"accept": "*/*"})
+			res = urllib.urlopen(req).read()
+			chattersData = json.loads(res)["chatters"]
+			with open(f'{folderPath}\\users.yml') as usersFile:
+				usersList = yaml.load(usersFile, Loader=yaml.FullLoader)
+			for user in usersList:
+				if (user in chattersData["broadcaster"] or 
+					user in chattersData["moderators"] or 
+					user in chattersData["global_mods"] or 
+					user in chattersData["admins"] or 
+					user in chattersData["staff"] or 
+					user in chattersData["viewers"]):
+						usersList[user]["points"] += 100 
+						with open(f'{folderPath}\\users.yml', 'w') as chatUsers:
+							chatUsersData = yaml.dump(usersList, chatUsers)
 		except Exception as e:
 			Utils.Bot.logging_all(str(e))
 		time.sleep(300)
 
 
 def responder(message, username):
+	folderPath = Utils.Bot.moduleFolder(__name__)
 	def declPoints(num):
 		return Utils.declensionNumsRus(num, singlNomin, singlGeni, pluralGeni)
 
 	def updateUserListFile(usersList):
-		with open(f'modules\\points\\users.yml', 'w') as chatUsers:
+		folderPath = Utils.Bot.moduleFolder(__name__)
+		with open(f'{folderPath}\\users.yml', 'w') as chatUsers:
 			chatUsersData = yaml.dump(usersList, chatUsers)
 
-	with open('modules\\points\\users.yml') as usersFile:
+	with open(f'{folderPath}\\users.yml') as usersFile:
 		usersList = yaml.load(usersFile, Loader=yaml.FullLoader)
 
 	if not username.lower() in usersList:
