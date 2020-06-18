@@ -18,7 +18,7 @@ def responder(message, username):
 			deltaMinutes = int((seconds % 3600) // 60)
 
 			wordHours = Utils.declensionNumsRus(deltaHours, "час", "часа", "часов")
-			wordMinutes = Utils.declensionNumsRus(deltaMinutes, "минута", "минуты", "минут")
+			wordMinutes = Utils.declensionNumsRus(deltaMinutes, "минуту", "минуты", "минут")
 
 			if deltaHours > 0:
 				hours = f"{deltaHours} {wordHours}"
@@ -29,6 +29,6 @@ def responder(message, username):
 			else:
 				mins = "ровно"
 
-			return f"{username}, {hours} {mins} <3"
+			return f"{username}, стрим длится {hours} {mins} <3"
 		else:
 			return f"{username}, стрим будет через час <3"
