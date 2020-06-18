@@ -54,7 +54,7 @@ class Stream(object):
 		return TwitchAPI.request(url)
 
 class Bot(object):
-	def gen_moduleFolder(modName):
+	def moduleFolder(modName):
 		if not modName.replace('modules.', '') in os.listdir("modules"):
 			modFolderName = modName.replace('modules.', '')
 			os.mkdir(f"modules\\{modFolderName}")
