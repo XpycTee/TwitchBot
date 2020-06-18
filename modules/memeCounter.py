@@ -1,30 +1,31 @@
 import Data
 
+def starter():
+	Data.Mods.globData["memeCounter"] = { "emoteСoincident": { "count" : 0, "emote" : None } }
+
 def responder(message, username):
+	print(Data.Mods.globData["memeCounter"])
+
 	def emoteFind(message):
 		splitedMsg = message.split(" ")
 		for emoteFind in splitedMsg:
 			if emoteFind in Data.Chat.emotes:
 				return emoteFind
 
-	histMsges = Data.Chat.historyMessages[::-1]
-
-	if len(histMsges) < 2:
-		return
-
 	emote = emoteFind(message.strip())
-	prevEmote = emoteFind(histMsges[0].strip())
 
-	if prevEmote == None:
+	prevEmote = Data.Mods.globData["memeCounter"]["emoteСoincident"]["emote"]
+
+	count = Data.Mods.globData["memeCounter"]["emoteСoincident"]["count"]
+	if emote != prevEmote:
+		Data.Mods.globData["memeCounter"]["emoteСoincident"]["count"] = 1
+		Data.Mods.globData["memeCounter"]["emoteСoincident"]["emote"] = emote
+		if prevEmote != None and count >= 3:
+			return f"{prevEmote} x{count}"
+	else:
+		if prevEmote != None:
+			Data.Mods.globData["memeCounter"]["emoteСoincident"]["count"] += 1
 		return
 
-	count = 0
-	if emote != prevEmote:
-		for i in range(0, len(histMsges)):
-			if prevEmote in histMsges[i].split(" "):
-				count += 1
-			else:
-				if count >= 3:
-					return f"{prevEmote} x{count}"
-				else:
-					return 
+
+

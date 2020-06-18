@@ -20,13 +20,16 @@ class Twitch(object):
 		pass
 
 class Chat(object):
-	countMessages = { "OnCurrentStream" : 0, "AllTime" : 0 }
-	historyMessages = list()
 	emotes = {}
 	userlist = {}
 	def __init__(self):
 		"""Constructor"""
 		pass
+
+class Mods(object):
+	commands = {}
+	globData = {}
+
 
 class Bot(object):
 	settings = {}

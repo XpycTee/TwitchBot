@@ -104,16 +104,18 @@ def main():
 	lEIThread = threading.Thread(target=loadEmotIcons)
 	lEIThread.start()
 	
-	
 	for module in modulesList['modules']:
 		Utils.Bot.logging_all(str(module))
+
 		if modulesList['modules'][module]['enabled']:
+			Data.Mods.globData[module] = {}
 			try:
 				execFunc = getattr(globals()[module], "starter")
 				execFThread = threading.Thread(target=execFunc)
 				execFThread.start()
-			except:
+			except AttributeError:
 				pass
+			
 
 	def execModule(message, username):
 		for module in modulesList['modules']:
@@ -122,7 +124,6 @@ def main():
 					execFunc = getattr(globals()[module], "responder")
 				except AttributeError:
 					break
-
 				if not username in Data.Chat.userlist:
 					disp_name = Utils.TwitchAPI.request(f'https://api.twitch.tv/kraken/users?login={username}')['users'][0]['display_name']
 					Data.Chat.userlist.update({ username : { "display_name" : disp_name } })
@@ -157,15 +158,8 @@ def main():
 				execMThread = threading.Thread(target=execModule, args=(message,username,))
 				execMThread.start()
 
-			Utils.Bot.logging_all(f"{username.strip()}: {message.strip()}")
-
-			if username != "tmi" and username != Data.Twitch.NICK.lower():
-				if Utils.Stream.isLive():
-					Data.Chat.countMessages["OnCurrentStream"] += 1
-				Data.Chat.countMessages["AllTime"] += 1
-				if len(Data.Chat.historyMessages) >= 100:
-					Data.Chat.historyMessages.pop(0)
-				Data.Chat.historyMessages.append(message.strip())
+				Utils.Bot.logging_all(f"{username.strip()}: {message.strip()}")
+	
 	return True
 
 reloading = True
