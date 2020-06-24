@@ -1,10 +1,11 @@
-import sys, datetime
+import sys, datetime, random
 
-import Utils
+import Utils, Data
 
 def responder(message, username):
-	message = message.lower()
-	if (message.strip() == "!uptime" or message.strip() == "!time" or message.strip() == "!время" or (message.find("сколько") != -1 and (message.find("идёт") != -1 or message.find("идет") != -1 or message.find("длится") != -1) and message.find("стрим") != -1)):
+
+
+	def timeResponder(username):
 		if Utils.Stream.isLive():
 			streamStartTimeAPI = Utils.Stream.requestData()['stream']['created_at']
 
@@ -32,3 +33,18 @@ def responder(message, username):
 			return f"{username}, стрим длится {hours} {mins} <3"
 		else:
 			return f"{username}, стрим будет через час <3"
+
+	message = message.lower()
+	splitedMsg = message.strip().split(" ")
+	if (splitedMsg[0] == "!uptime" or splitedMsg[0] == "!time" or splitedMsg[0] == "!время"):
+		if len(splitedMsg) == 1:
+			return timeResponder(username)
+		else:
+			toWhom = splitedMsg[1].replace("@", "")
+			if toWhom.lower() in Data.Chat.userlist:
+				return timeResponder(Data.Chat.userlist[toWhom]['display_name'])
+			else:
+				return timeResponder(username)
+
+	if (message.find("сколько") != -1 and (message.find("идёт") != -1 or message.find("идет") != -1 or message.find("длится") != -1) and message.find("стрим") != -1):
+		return timeResponder(username)
