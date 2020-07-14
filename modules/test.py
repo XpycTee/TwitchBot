@@ -1,9 +1,21 @@
 import sys
 from time import sleep
 from random import randint
+import Utils, Data
 
 def responder(message, username):
-	if message.strip() == "!hi":
+	message = message.lower()
+	splitedMsg = message.strip().split(" ")
+	if (splitedMsg[0] == "!mod" or splitedMsg[0] == "!мод" or splitedMsg[0] == "!моды"):
+		if len(splitedMsg) == 1:
+			return f"{username}, Fate of Wanderer <3"
+		else:
+			toWhom = splitedMsg[1].replace("@", "")
+			if toWhom.lower() in Data.Chat.userlist:
+				return f"{Data.Chat.userlist[toWhom]['display_name']} Fate of Wanderer <3"
+			else:
+				return f"{username}, Fate of Wanderer <3"
+	"""if message.strip() == "!hi":
 		return f"Привет, {username} KonCha <3"
 	if message.strip() == "!roll":
 		return f"{username} выкинул: {str(randint(1, 6))}"
@@ -32,4 +44,4 @@ def responder(message, username):
 			checkHelloMess.find("VoHiYo") != -1 or 
 			checkHelloMess.find("hello") != -1)):
 		sleep(2)
-		return f"Привет, {username} KonCha <3"
+		return f"Привет, {username} KonCha <3"""

@@ -46,5 +46,5 @@ def responder(message, username):
 			else:
 				return timeResponder(username)
 
-	if (message.find("сколько") != -1 and (message.find("идёт") != -1 or message.find("идет") != -1 or message.find("длится") != -1) and message.find("стрим") != -1):
+	if (message.find("давно") != -1 or message.find("сколько") != -1) and (message.find("идёт") != -1 or message.find("идет") != -1 or message.find("длится") != -1) and message.find("стрим") != -1:
 		return timeResponder(username)

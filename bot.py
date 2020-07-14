@@ -154,12 +154,11 @@ def main():
 				Utils.Bot.logging_all(str(response))
 				break
 
-			if username != "tmi" and username != Data.Twitch.NICK.lower():
+			if username != "tmi" and (username != Data.Twitch.NICK.lower() or username == "xpyctee"):
 				execMThread = threading.Thread(target=execModule, args=(message,username,))
 				execMThread.start()
 
 				Utils.Bot.logging_all(f"{username.strip()}: {message.strip()}")
-	
 	return True
 
 reloading = True
