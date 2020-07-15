@@ -11,7 +11,7 @@ def starter():
 	}
 	folderPath = Utils.Bot.moduleFolder(__name__)
 	if not 'messages.yml' in os.listdir(folderPath):
-		with open(f'{folderPath}\\messages.yml', 'w') as spamMsgs:
+		with open(f'{folderPath}/messages.yml', 'w') as spamMsgs:
 			spamMsgData = yaml.dump(spamList, spamMsgs)
 
 	Data.Mods.globData["timer"] = { "messages": { "count" : 0 }, "timers" : { "0" : { "last_time" : 0, "last_post" : 0 } } }
@@ -19,7 +19,7 @@ def starter():
 def responder(message, username):
 	Data.Mods.globData["timer"]["messages"]["count"] += 1
 	folderPath = Utils.Bot.moduleFolder(__name__)
-	with open(f'{folderPath}\\messages.yml') as spamMsgs:
+	with open(f'{folderPath}/messages.yml') as spamMsgs:
 		spamList = yaml.load(spamMsgs, Loader=yaml.FullLoader)
 	countMessInFile = len(spamList["timers"][0])
 	countMessLocal = len(Data.Mods.globData["timer"]["timers"])

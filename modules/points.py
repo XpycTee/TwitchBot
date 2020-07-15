@@ -13,7 +13,7 @@ def starter():
 	usersList = {}
 	folderPath = Utils.Bot.moduleFolder(__name__)
 	if not f'users.yml' in os.listdir(folderPath):
-		with open(f'{folderPath}\\users.yml', 'w') as chatUsers:
+		with open(f'{folderPath}/users.yml', 'w') as chatUsers:
 			chatUsersData = yaml.dump(usersList, chatUsers)
 	
 	while Utils.Stream.isLive():
@@ -22,7 +22,7 @@ def starter():
 			req = urllib.Request(url, headers={"accept": "*/*"})
 			res = urllib.urlopen(req).read()
 			chattersData = json.loads(res)["chatters"]
-			with open(f'{folderPath}\\users.yml') as usersFile:
+			with open(f'{folderPath}/users.yml') as usersFile:
 				usersList = yaml.load(usersFile, Loader=yaml.FullLoader)
 			for user in usersList:
 				if (user in chattersData["broadcaster"] or 
@@ -32,7 +32,7 @@ def starter():
 					user in chattersData["staff"] or 
 					user in chattersData["viewers"]):
 						usersList[user]["points"] += 100 
-						with open(f'{folderPath}\\users.yml', 'w') as chatUsers:
+						with open(f'{folderPath}/users.yml', 'w') as chatUsers:
 							chatUsersData = yaml.dump(usersList, chatUsers)
 		except Exception as e:
 			Utils.Bot.logging_all(str(e))
@@ -46,10 +46,10 @@ def responder(message, username):
 
 	def updateUserListFile(usersList):
 		folderPath = Utils.Bot.moduleFolder(__name__)
-		with open(f'{folderPath}\\users.yml', 'w') as chatUsers:
+		with open(f'{folderPath}/users.yml', 'w') as chatUsers:
 			chatUsersData = yaml.dump(usersList, chatUsers)
 
-	with open(f'{folderPath}\\users.yml') as usersFile:
+	with open(f'{folderPath}/users.yml') as usersFile:
 		usersList = yaml.load(usersFile, Loader=yaml.FullLoader)
 
 	if not username.lower() in usersList:

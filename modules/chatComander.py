@@ -3,9 +3,9 @@ def starter():
 	folderPath = Utils.Bot.moduleFolder(__name__)
 	if not 'commands.yml' in os.listdir(folderPath):
 		nulDict = {}
-		with open(f'{folderPath}\\commands.yml', 'w') as commands:
+		with open(f'{folderPath}/commands.yml', 'w') as commands:
 			commandsData = yaml.dump(nulDict, commands)
-	with open(f'{folderPath}\\commands.yml') as commands:
+	with open(f'{folderPath}/commands.yml') as commands:
 		commandsData = yaml.load(commands, Loader=yaml.FullLoader)
 	Data.Mods.globData["chatCommander"] = commandsData
 
@@ -13,7 +13,7 @@ def responder(message, username):
 	def addCommand(command, respond):
 		Data.Mods.globData["chatCommander"].update({command : respond})
 		folderPath = Utils.Bot.moduleFolder(__name__)
-		with open(f'{folderPath}\\commands.yml', 'w') as commands:
+		with open(f'{folderPath}/commands.yml', 'w') as commands:
 			caommandsData = yaml.dump(Data.Mods.globData["chatCommander"], commands)
 		return f"{username}, команда !{command} добавлена"
 	def removeCommand(command):
@@ -22,7 +22,7 @@ def responder(message, username):
 		except KeyError:
 			return f"{username}, команды !{command} нет"
 		folderPath = Utils.Bot.moduleFolder(__name__)
-		with open(f'{folderPath}\\commands.yml', 'w') as commands:
+		with open(f'{folderPath}/commands.yml', 'w') as commands:
 			caommandsData = yaml.dump(Data.Mods.globData["chatCommander"], commands)
 		return f"{username}, команда !{command} удалена"
 
