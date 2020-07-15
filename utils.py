@@ -57,11 +57,11 @@ class Bot(object):
 	def moduleFolder(modName):
 		if not modName.replace('modules.', '') in os.listdir("modules"):
 			modFolderName = modName.replace('modules.', '')
-			os.mkdir(f"modules\\{modFolderName}")
-			return f"modules\\{modFolderName}"
+			os.mkdir(f"modules/{modFolderName}")
+			return f"modules/{modFolderName}"
 		else:
 			modFolderName = modName.replace('modules.', '')
-			return f"modules\\{modFolderName}"
+			return f"modules/{modFolderName}"
 	
 	def logging_all(message):
 		Bot.logging_inFile(message)
@@ -76,7 +76,7 @@ class Bot(object):
 		if Data.Bot.settings['logging']['file']:
 			today = datetime.datetime.today()
 			timeNow = time.strftime("%H.%M.%S", time.localtime())
-			with open(f'log\\log_{today.strftime("%Y-%m-%d")}.log', 'a', encoding='utf-8') as log_file:
+			with open(f'log/log_{today.strftime("%Y-%m-%d")}.log', 'a', encoding='utf-8') as log_file:
 				log_file.write(f"{timeNow} {message}\n")
 	
 	def fill_opList():
