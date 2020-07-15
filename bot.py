@@ -8,6 +8,10 @@ import modules, Utils
 from modules import *
 
 def sock_connecting():
+	"""
+		Function for connecting to Twitch Chat
+		return socket of connection
+	"""
 	tcp_sock = socket.socket()
 	ssl_sock = ssl.wrap_socket(tcp_sock)
 	ssl_sock.connect((Data.Twitch.HOST, Data.Twitch.PORT))
@@ -34,23 +38,26 @@ def reload_package(package):
     return reload_recursive_ex(package)
 
 def main():
+	"""
+		Main function
+	"""
 	connected = False
 	while connected != True:
 		try:
 			sock = sock_connecting()
 			connected = True
-		except:
+		except ConnectionRefusedError:
 			Utils.Bot.logging_all("Нет соеденения")
-			sleep(1)
+			sleep(10)
 
 	modulesList = {}
 	with open('modules.yml') as modulesFile:
 		modulesList = yaml.load(modulesFile, Loader=yaml.FullLoader)
-	for file in os.listdir(".\\modules"):
+	for file in os.listdir("modules"):
 		if file != "__init__.py":
 			if file.endswith(".py"):
 				for module in list(modulesList['modules']):
-					if not f'{module}.py' in os.listdir(".\\modules"):
+					if not f'{module}.py' in os.listdir("modules"):
 						del modulesList['modules'][module]
 				if not file.replace('.py', '') in modulesList['modules']:
 					modulesList['modules'][file.replace('.py', '')] = {'enabled': True}
@@ -105,7 +112,11 @@ def main():
 	lEIThread.start()
 	
 	for module in modulesList['modules']:
-		Utils.Bot.logging_all(str(module))
+		if modulesList['modules'][module]['enabled']:
+			status = "enabled"
+		else:
+			status = "disabled"
+		Utils.Bot.logging_all(f"Module: {str(module)} status: {status}")
 
 		if modulesList['modules'][module]['enabled']:
 			Data.Mods.globData[module] = {}
