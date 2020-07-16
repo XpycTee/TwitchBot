@@ -44,7 +44,8 @@ def responder(message, username):
 					respond = f"{respond} {splitedMsg[wordIndex]}"
 			if (splitedMsg[0].lower() == "!addcommand"):
 				return addCommand(splitedMsg[1].lower(),respond);
-		
+	if splitedMsg[0][0] != "!":
+		return None
 	commandForRespond = splitedMsg[0].replace("!","")
 	if commandForRespond in Data.Mods.globData["chatCommander"]:
 		if len(splitedMsg) == 1:
