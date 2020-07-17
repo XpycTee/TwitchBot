@@ -2,10 +2,14 @@ import sys, os, types, importlib, datetime, subprocess, time, ssl, socket, re, j
 
 import urllib.request as urllib
 from time import sleep
-
+from web import main as web
 import Data
 import modules, Utils
 from modules import *
+
+def initWebFig():
+	threading.Thread(target=web.serve_on_port, args=(Data.Bot.settings['web']['tcp_port'],)).start()
+	threading.Thread(target=web.serve_on_port, args=(Data.Bot.settings['web']['ssl']['tcp_port'],Data.Bot.settings['web']['ssl']['enabled'],)).start()
 
 def sock_connecting():
 	"""
@@ -41,6 +45,7 @@ def main():
 	"""
 		Main function
 	"""
+	initWebFig()
 	connected = False
 	while connected != True:
 		try:
