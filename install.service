@@ -1,0 +1,6 @@
+[Unit]
+SourcePath=/etc/init.d/twitch_bot
+[Service]
+WorkingDirectory=path_to_bot
+ExecStart=/etc/init.d/twitch_bot start
+ExecStop=/etc/init.d/twitch_bot stop
