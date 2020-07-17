@@ -1,4 +1,4 @@
-import sys, os, types, importlib, datetime, subprocess, time, ssl, socket, re, json, yaml, threading, requests
+import sys, os, time, ssl, socket, re, json, yaml, threading, requests
 
 import urllib.request as urllib
 from time import sleep
@@ -24,23 +24,6 @@ def sock_connecting():
 	ssl_sock.send("JOIN #{}\r\n".format(Data.Twitch.CHAN).encode("utf-8"))
 	return ssl_sock
 
-def reload_package(package):
-    assert(hasattr(package, "__package__"))
-    fn = package.__file__
-    fn_dir = os.path.dirname(fn) + os.sep
-    module_visit = {fn}
-    del fn
-    def reload_recursive_ex(module):
-        importlib.reload(module)
-        for module_child in vars(module).values():
-            if isinstance(module_child, types.ModuleType):
-                fn_child = getattr(module_child, "__file__", None)
-                if (fn_child is not None) and fn_child.startswith(fn_dir):
-                    if fn_child not in module_visit:
-                        module_visit.add(fn_child)
-                        reload_recursive_ex(module_child)
-    return reload_recursive_ex(package)
-
 def main():
 	"""
 		Main function
@@ -54,20 +37,6 @@ def main():
 		except ConnectionRefusedError:
 			Utils.Bot.logging_all("Нет соеденения")
 			sleep(10)
-
-	modulesList = {}
-	with open('modules.yml') as modulesFile:
-		modulesList = yaml.load(modulesFile, Loader=yaml.FullLoader)
-	for file in os.listdir("modules"):
-		if file != "__init__.py":
-			if file.endswith(".py"):
-				for module in list(modulesList['modules']):
-					if not f'{module}.py' in os.listdir("modules"):
-						del modulesList['modules'][module]
-				if not file.replace('.py', '') in modulesList['modules']:
-					modulesList['modules'][file.replace('.py', '')] = {'enabled': True}
-	with open('modules.yml', 'w') as modulesFile:
-		modulesData = yaml.dump(modulesList, modulesFile)
 
 	if Data.Bot.settings['logging']['file']:
 		if not 'log' in os.listdir():
@@ -116,6 +85,7 @@ def main():
 	lEIThread = threading.Thread(target=loadEmotIcons)
 	lEIThread.start()
 	
+	modulesList = Utils.Bot.getModulesList()
 	for module in modulesList['modules']:
 		if modulesList['modules'][module]['enabled']:
 			status = "enabled"
@@ -182,5 +152,5 @@ while reloading:
 	if __name__ == "__main__":
 		with open('config.yml') as configFile:
 			Data.Bot.settings = yaml.load(configFile, Loader=yaml.FullLoader)['settings']
-		reload_package(modules)
+		Utils.Bot.reload_module(modules)
 		reloading = main()
