@@ -38,7 +38,7 @@ def responder(message, username):
 
 	splitedMsg = message.strip().split(" ")
 	if Utils.Chat.Users.isOp(username):
-		if (splitedMsg[0].lower() == "!rmcommand" or splitedMsg[0].lower() == "!addcommand"):
+		if (splitedMsg[0].lower() == "!rmcommand" or splitedMsg[0].lower() == "!addcommand" or splitedMsg[0].lower() == "!upcommand"):
 			try:
 				command = splitedMsg[1].lower()
 			except IndexError:
