@@ -13,9 +13,12 @@ def responder(message, username):
 	def addCommand(command, respond):
 		Data.Mods.globData["chatCommander"].update({command : respond})
 		folderPath = Utils.Bot.moduleFolder(__name__)
+		if command == Data.Mods.globData["chatCommander"]:
+			return f"{username}, команда !{command} уже существует"
 		with open(f'{folderPath}/commands.yml', 'w') as commands:
-			caommandsData = yaml.dump(Data.Mods.globData["chatCommander"], commands)
+			commandsData = yaml.dump(Data.Mods.globData["chatCommander"], commands)
 		return f"{username}, команда !{command} добавлена"
+
 	def removeCommand(command):
 		try:
 			Data.Mods.globData["chatCommander"].pop(command)
@@ -23,8 +26,15 @@ def responder(message, username):
 			return f"{username}, команды !{command} нет"
 		folderPath = Utils.Bot.moduleFolder(__name__)
 		with open(f'{folderPath}/commands.yml', 'w') as commands:
-			caommandsData = yaml.dump(Data.Mods.globData["chatCommander"], commands)
+			commandsData = yaml.dump(Data.Mods.globData["chatCommander"], commands)
 		return f"{username}, команда !{command} удалена"
+		
+	def updateCommand(command, respond):
+		Data.Mods.globData["chatCommander"].update({command : respond})
+		folderPath = Utils.Bot.moduleFolder(__name__)
+		with open(f'{folderPath}/commands.yml', 'w') as commands:
+			commandsData = yaml.dump(Data.Mods.globData["chatCommander"], commands)
+		return f"{username}, команда !{command} обновлена"
 
 	splitedMsg = message.strip().split(" ")
 	if Utils.Chat.Users.isOp(username):
@@ -43,6 +53,8 @@ def responder(message, username):
 				for wordIndex in range(3,len(splitedMsg)):
 					respond = f"{respond} {splitedMsg[wordIndex]}"
 			if (splitedMsg[0].lower() == "!addcommand"):
+				return addCommand(splitedMsg[1].lower(),respond);
+			if (splitedMsg[0].lower() == "!upcommand"):
 				return addCommand(splitedMsg[1].lower(),respond);
 	if splitedMsg[0][0] != "!":
 		return None
