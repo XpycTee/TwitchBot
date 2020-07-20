@@ -55,7 +55,8 @@ def responder(message, username):
 			if (splitedMsg[0].lower() == "!addcommand"):
 				return addCommand(splitedMsg[1].lower(),respond);
 			if (splitedMsg[0].lower() == "!upcommand"):
-				return addCommand(splitedMsg[1].lower(),respond);
+				return updateCommand(splitedMsg[1].lower(),respond);
+
 	if splitedMsg[0][0] != "!":
 		return None
 	commandForRespond = splitedMsg[0].replace("!","")
