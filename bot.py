@@ -1,3 +1,4 @@
+#!/usr/bin/python3
 import sys, os, time, ssl, socket, re, json, yaml, threading, requests
 
 import urllib.request as urllib

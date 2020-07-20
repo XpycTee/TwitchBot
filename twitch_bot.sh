@@ -26,14 +26,6 @@ case "$1" in
     start-stop-daemon --start --quiet --background --chdir path_to_bot --make-pidfile --pidfile $PIDFILE --exec $DAEMON -- $DAEMON_OPTS
     echo "."
     ;;
-  status)
-        echo -n "Status daemon: "$NAME
-		echo -n `start-stop-daemon --status --pidfile $PIDFILE`
-    echo "."
-    ;;
-  *)
-    echo "Usage: "$1" {start|stop|restart|status}"
-    exit 1
 esac
 
 exit 0

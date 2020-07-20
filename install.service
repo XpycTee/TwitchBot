@@ -1,6 +1,11 @@
 [Unit]
+Description=XpycTee's Twitch-Bot
 SourcePath=/etc/init.d/twitch_bot
+After=multi-user.target
 [Service]
+Type=forking
 WorkingDirectory=path_to_bot
 ExecStart=/etc/init.d/twitch_bot start
 ExecStop=/etc/init.d/twitch_bot stop
+[Install]
+WantedBy=multi-user.target
