@@ -8,8 +8,6 @@ Type=forking
 WorkingDirectory=path_to_bot
 ExecStart=/etc/init.d/twitch_bot start
 ExecStop=/etc/init.d/twitch_bot stop
-User=twitch_bot
-Group=twitch_bot
 
 [Install]
 WantedBy=multi-user.target

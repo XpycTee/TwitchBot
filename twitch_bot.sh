@@ -12,7 +12,7 @@ DAEMON="/usr/bin/python3 path_to_bot/bot.py"
 case "$1" in
   start)
         echo -n "Starting daemon: "$NAME
-    start-stop-daemon --start --quiet --background --chdir path_to_bot --pidfile $PIDFILE --exec $DAEMON -- $DAEMON_OPTS
+    start-stop-daemon --start --quiet --background --user twitch_bot --chdir path_to_bot --pidfile $PIDFILE --exec $DAEMON -- $DAEMON_OPTS
         echo "."
     ;;
   stop)
@@ -23,7 +23,7 @@ case "$1" in
   restart)
         echo -n "Restarting daemon: "$NAME
     start-stop-daemon --stop --quiet --oknodo --retry 30 --pidfile $PIDFILE
-    start-stop-daemon --start --quiet --background --chdir path_to_bot --pidfile $PIDFILE --exec $DAEMON -- $DAEMON_OPTS
+    start-stop-daemon --start --quiet --background --user twitch_bot --chdir path_to_bot --pidfile $PIDFILE --exec $DAEMON -- $DAEMON_OPTS
     echo "."
     ;;
 esac
