@@ -4,6 +4,12 @@ twitch:
   api-token: "Token" #[Otional] Twitch API Kraken Token 
   channel: "ChannelForUseBot"
 settings:
+  web:
+    enabled: True
+    tcp_port: 8080
+    ssl:
+      enabled: True
+      tcp_port: 8443
   logging:
     live: True
     file: False
