@@ -106,7 +106,10 @@ class Bot(object):
 
 	def getModulesList():
 		modulesList = {}
-		with open('modules.yml', 'w+') as modulesFile:
+		if not 'modules.yml' in os.listdir():
+			with open('modules.yml', 'w') as modulesFile:
+				modulesList = yaml.load(modulesFile, Loader=yaml.FullLoader)
+		with open('modules.yml', 'r+') as modulesFile:
 			modulesList = yaml.load(modulesFile, Loader=yaml.FullLoader)
 			if modulesList == None:
 				modulesList = {"modules":{"None":None}}
@@ -118,6 +121,7 @@ class Bot(object):
 						for module in list(modulesList['modules']):
 							if not f'{module}.py' in os.listdir("modules"):
 								del modulesList['modules'][module]
+		with open('modules.yml', 'w') as modulesFile:
 			modulesData = yaml.dump(modulesList, modulesFile)
 		return modulesList
 
