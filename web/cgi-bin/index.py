@@ -3,7 +3,6 @@ import os, cgi
 field = cgi.FieldStorage()
 print("Content-type: text/html")
 print()
-print(field)
 with open('web/index.html') as html:
 	htmlContents = ""
 	with open('web/pages/home.html') as homeFile:
