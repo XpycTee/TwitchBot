@@ -16,4 +16,7 @@ with open('web/index.html') as html:
 		<p>TEXT_2: {text_2}</p><br>
 	</div>"""
 	
-	print(html.read().format(page_name="Form response", current_name="XpycTee", another_name="Biba", contents=htmlContents.format(text_1=text1,text_2=text2)))
+	print(html.read().format(page_name="Home",
+			user_name="XpycTee",
+			user_menu1="Menu 1",
+			user_menu2="Menu 2", contents=htmlContents.format(text_1=text1,text_2=text2)))
