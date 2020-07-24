@@ -50,6 +50,26 @@
   <link rel="stylesheet" href="/styles.css">
 </head>
 <body>
+  <dialog class="mdl-dialog">
+    <h4 class="mdl-dialog__title">Login</h4>
+    <div class="mdl-dialog__content">
+      <form action="/authtorize" method="POST">
+   <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label textfield-demo">
+    <input class="mdl-textfield__input" type="text" id="sample3" name="login" />
+    <label class="mdl-textfield__label" for="sample3">Login...</label>                 
+  </div><br>
+  <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label textfield-demo">
+    <input class="mdl-textfield__input" type="password" id="sample4" name="password" />
+    <label class="mdl-textfield__label" for="sample4">Password...</label>
+    <span class="mdl-textfield__error">Input is not a number!</span>
+  </div><br>
+    </div>
+    <div class="mdl-dialog__actions">
+      <button type="submit" class="mdl-button">Login</button>
+      <button type="cancel" class="mdl-button close">Cancel</button>
+    </div>
+    </form>
+  </dialog>
 	<div class="demo-layout mdl-layout mdl-js-layout mdl-layout--fixed-drawer mdl-layout--fixed-header">
 		<header class="demo-header mdl-layout__header mdl-color--grey-100 mdl-color-text--grey-600">
 			<div class="mdl-layout__header-row">
@@ -85,9 +105,9 @@
 						<span class="visuallyhidden">Accounts</span>
 					</button>
 					<ul class="mdl-menu mdl-menu--bottom-right mdl-js-menu mdl-js-ripple-effect" for="accbtn">
-						<li class="mdl-menu__item">{user_menu1}</li>
-						<li class="mdl-menu__item">{user_menu2}</li>
-						<!--li class="mdl-menu__item"><i class="material-icons">add</i>Add another account...</li-->
+						<li class="mdl-menu__item"><a class="mdl-navigation__link" href="/user_settings"><i class="material-icons">settings</i>User settings</a></li>
+						<!--li class="mdl-menu__item">user_menu2</li>
+						<li class="mdl-menu__item"><i class="material-icons">add</i>Add another account...</li-->
 					</ul>
 				</div>
 			</header>
@@ -156,5 +176,6 @@
 </svg>
 <a href="https://github.com/google/material-design-lite/blob/mdl-1.x/templates/dashboard/" target="_blank" id="view-source" class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--colored mdl-color-text--white">View Source</a>
 <script src="https://code.getmdl.io/1.3.0/material.min.js"></script>
+<script src="/scripts.js"></script>
 </body>
 </html>
