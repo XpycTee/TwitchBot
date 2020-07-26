@@ -18,38 +18,91 @@
 	<link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
 	<link rel="stylesheet" href="https://code.getmdl.io/1.3.0/material.cyan-light_blue.min.css">
 	<link rel="stylesheet" href="/styles.css">
+	<script>
+		function get_cookie(cookie_name)
+		{
+			var results = document.cookie.match('(^|;) ?' + cookie_name + '=([^;]*)(;|$)');
+			if (results)
+				return (unescape(results[2]));
+			else
+				return null;
+		}
+	</script>
 </head>
 <body>
-	
-	<div class="mdl-layout mdl-js-layout mdl-color--indigo-900">
-		<div class="mdl-layout__header mdl-layout__header--scroll mdl-color--indigo-900 pulg"></div>
+	<div class="mdl-js-snackbar mdl-snackbar">
+		<div class="mdl-snackbar__text"></div>
+		<button class="mdl-snackbar__action" type="button"></button>
+	</div>
+	<script>
+		setTimeout(() => { 
+			(function() {
+				var authStatus = get_cookie("auth");
+				if (authStatus == "done") {
+					window.location.href = '/';
+				}
+				if (authStatus != null) {
+					status = authStatus.split(":")[0];
+					code = authStatus.split(":")[1];
+					if (status == "failed") {
+						var data
+						switch (code) {
+							case "404":
+							data = {message: 'Authorization failed: user not found'};
+							break;
+							case "405":
+							data = {message: 'Authorization failed: wrong password'};
+							break;
+							case "406":
+							data = {message: 'Authorization failed: wrong username or password'};
+							break;
+						}
+						var notification = document.querySelector('.mdl-js-snackbar');
+						notification.MaterialSnackbar.showSnackbar(data);
+					}
+				}
+				
+			}());
+		}, 500);
+	</script>
+	<div class="mdl-layout mdl-js-layout mdl-color--blue-grey-900">
+		<div class="mdl-layout__header mdl-layout__header--scroll mdl-color--blue-grey-900 pulg"></div>
 		<main class="mdl-layout__content">
 			<div class="mdl-grid demo-content">
 				<div class="mdl-cell mdl-cell--4-col plug"></div>
-				<div class="demo-charts mdl-shadow--2dp mdl-color--white mdl-cell mdl-cell--4-col">
+				<div class="demo-charts mdl-shadow--2dp mdl-color--blue-grey-800 mdl-color-text--blue-grey-50 mdl-cell mdl-cell--4-col">
 					<div class="mdl-tabs__panel" id="Floating-panel">
 						<h4 class="mdl-dialog__title">
-							<img height="100" src="/images/smiles/KonCha.png" alt="KonCha">
+							<img id="KonCha" height="100" src="/images/smiles/KonCha.png" alt="KonCha">
 							Login
 						</h4>
 						<div class="mdl-dialog__content">
-							<form action="/authtorize" method="POST">
+							<form action="/auth" method="POST">
 								<div class="mdl-cell mdl-cell--12-col mdl-cell--middle mdl-textfield mdl-js-textfield mdl-textfield--floating-label textfield-demo">
-									<input class="mdl-textfield__input" type="text" id="login_input" name="login" />
-									<label class="mdl-textfield__label" for="login_input">Login...</label>                 
+									<input class="mdl-textfield__input mdl-color-text--blue-grey-50" type="text" id="login_input" name="login" />
+									<label class="mdl-textfield__label mdl-color-text--blue-grey-300" for="login_input">Login...</label>                 
 								</div><br>
 								<div class="mdl-cell mdl-cell--12-col mdl-cell--middle mdl-textfield mdl-js-textfield mdl-textfield--floating-label textfield-demo">
-									<input class="mdl-textfield__input" type="password" id="passwd_input" name="password" />
-									<label class="mdl-textfield__label" for="passwd_input">Password...</label>
+									<input class="mdl-textfield__input mdl-color-text--blue-grey-50" type="password" id="passwd_input" name="password" />
+									<label class="mdl-textfield__label mdl-color-text--blue-grey-300" for="passwd_input">Password...</label>
 									<!--span class="mdl-textfield__error">Input is not a number!</span-->
 								</div><br>
 							</div>
 							<div class="mdl-dialog__actions">
 								<label class="mdl-switch mdl-js-switch mdl-js-ripple-effect" for="remeber-switch">
 									<input type="checkbox" id="remeber-switch" name="remeber" class="mdl-switch__input">
-									<span class="mdl-switch__label">Remeber me</span>
+									<span class="mdl-switch__label">
+										Remeber me 
+										<span>
+											<i id="tt1" class="icon material-icons mdl-color-text--blue-grey-300">error_outline</i>
+											<div class="mdl-tooltip" data-mdl-for="tt1">
+												Extend session time by 7 days
+											</span>
+										</div>
+									</span>
+									
 								</label>
-								<button type="submit" class="mdl-button">Login</button>
+								<button type="submit" class="mdl-button mdl-color-text--blue-grey-50">Login</button>
 							</div>
 						</form>
 					</div>
@@ -58,6 +111,7 @@
 			</div>
 		</main>
 	</div>
+	<script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
 	<script src="https://code.getmdl.io/1.3.0/material.min.js"></script>
 </body>
 </html>

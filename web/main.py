@@ -23,7 +23,7 @@ class HttpProcessor(HandlerClass):
 			self.path = "/cgi-bin/router.py"
 		return HandlerClass.do_GET(self)
 	def do_POST(self):
-		if self.path == "/authtorize":
+		if self.path == "/auth":
 			self.path = "/cgi-bin/auth.py"
 		return HandlerClass.do_POST(self)
 	def __init__(self, *args, **kwargs):
