@@ -125,6 +125,9 @@ def main():
 		sock.settimeout(360)
 		try:
 			response = sock.recv(1024).decode("utf-8")
+		except KeyboardInterrupt:
+			Utils.Bot.logging_all("Script has interrupted")
+			return False
 		except Exception as e:
 			Utils.Bot.logging_all(str(e))
 			Utils.Bot.logging_all(str(response))
