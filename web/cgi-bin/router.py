@@ -5,7 +5,7 @@ import sys
 from http import cookies
 
 #sys.path.insert(0, "")
-import Data
+#import Data
 
 cookie = cookies.SimpleCookie(os.environ['HTTP_COOKIE'])
 session = cookie.get("session")

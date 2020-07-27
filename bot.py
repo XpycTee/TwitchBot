@@ -11,164 +11,131 @@ import threading
 import requests
 import urllib.request as urllib
 from time import sleep
-from web import main as web
+
+from web import server
 import Data
-import modules, Utils
+import modules
 from modules import *
 
 def initWebFig():
-	ip = Data.Bot.settings['web']['ip_address']
+    
+    ip = Data.Bot.settings['web']['ip_address']
 
-	port = int(Data.Bot.settings['web']['tcp_port'])
-	threading.Thread(target=web.serve_on_port, args=(ip,port,)).start()
+    port = int(Data.Bot.settings['web']['tcp_port'])
+    serv = server.Server(ip,port)
+    threading.Thread(target=serv.startServer).start()
 
-	sslEnabled = Data.Bot.settings['web']['ssl']['enabled']
-	port = int(Data.Bot.settings['web']['ssl']['tcp_port'])
-	threading.Thread(target=web.serve_on_port, args=(ip,port,sslEnabled,)).start()
+    sslEnabled = Data.Bot.settings['web']['ssl']['enabled']
+    port = int(Data.Bot.settings['web']['ssl']['tcp_port'])
+    serv = server.Server(ip,port,sslEnabled)
+    threading.Thread(target=serv.startServer).start()
 
 def sock_connecting():
-	"""
-		Function for connecting to Twitch Chat
-		return socket of connection
-	"""
-	tcp_sock = socket.socket()
-	ssl_sock = ssl.wrap_socket(tcp_sock)
-	ssl_sock.connect((Data.Twitch.HOST, Data.Twitch.PORT))
-	ssl_sock.send("PASS oauth:{}\r\n".format(Data.Twitch.PASS).encode("utf-8"))
-	ssl_sock.send("NICK {}\r\n".format(Data.Twitch.NICK).encode("utf-8"))
-	ssl_sock.send("JOIN #{}\r\n".format(Data.Twitch.CHAN).encode("utf-8"))
-	return ssl_sock
+    """
+        Function for connecting to Twitch Chat
+        return socket of connection
+    """
+    tcp_sock = socket.socket()
+    ssl_sock = ssl.wrap_socket(tcp_sock)
+    ssl_sock.connect((Data.Twitch.HOST, Data.Twitch.PORT))
+    ssl_sock.send("PASS oauth:{}\r\n".format(Data.Twitch.PASS).encode("utf-8"))
+    ssl_sock.send("NICK {}\r\n".format(Data.Twitch.NICK).encode("utf-8"))
+    ssl_sock.send("JOIN #{}\r\n".format(Data.Twitch.CHAN).encode("utf-8"))
+    return ssl_sock
 
 def main():
-	"""
-		Main function
-	"""
-	initWebFig()
-	connected = False
-	while connected != True:
-		try:
-			sock = sock_connecting()
-			connected = True
-		except ConnectionRefusedError:
-			Utils.Bot.logging_all("Нет соеденения")
-			sleep(10)
+    """
+        Main function
+    """
+    connected = False
+    while connected != True:
+        try:
+            sock = sock_connecting()
+            connected = True
+        except ConnectionRefusedError:
+            Data.Bot.logging_all("Нет соеденения")
+            sleep(10)
 
-	if Data.Bot.settings['logging']['file']:
-		if not 'log' in os.listdir():
-			os.mkdir('log')
+    if Data.Bot.settings['logging']['file']:
+        if not 'log' in os.listdir():
+            os.mkdir('log')
 
-	chat_message = re.compile(r"^:\w+!\w+@\w+\.tmi\.twitch\.tv PRIVMSG #\w+ :")
+    chat_message = re.compile(r"^:\w+!\w+@\w+\.tmi\.twitch\.tv PRIVMSG #\w+ :")
 
-	fillOPThread = threading.Thread(target=Utils.Bot.fill_opList)
-	fillOPThread.start()
+    fillOPThread = threading.Thread(target=Data.Bot.fill_opList)
+    fillOPThread.start()
 
-	Data.Stream.channel_ID = Utils.TwitchAPI.request(f'https://api.twitch.tv/kraken/users?login={Data.Twitch.CHAN}')['users'][0]['_id']
+    Data.Stream.channel_ID = Data.TwitchAPI.request(f'https://api.twitch.tv/kraken/users?login={Data.Twitch.CHAN}')['users'][0]['_id']    
+    
+    modulesList = Data.Bot.getModulesList()
+    for module in modulesList['modules']:
+        if modulesList['modules'][module]['enabled']:
+            status = "enabled"
+        else:
+            status = "disabled"
+        Data.Bot.logging_all(f"Module: {str(module)} status: {status}")
 
-	def loadEmotIcons():
-		def urlRequest(url, headers = {"accept": "application/json"}):
-			request = urllib.Request(url, headers=headers)
-			response = urllib.urlopen(request).read().decode("utf-8")
-			return response
+        if modulesList['modules'][module]['enabled']:
+            Data.Mods.globData[module] = {}
+            try:
+                execFunc = getattr(globals()[module], "starter")
+                execFThread = threading.Thread(target=execFunc)
+                execFThread.start()
+            except AttributeError:
+                pass
+            
 
-		globsFFacezJSON = json.loads(urlRequest('https://api.frankerfacez.com/v1/set/global'))
-		globsFFacezList = globsFFacezJSON["sets"][str(globsFFacezJSON["default_sets"][0])]["emoticons"]
-		for FFZemIcon in globsFFacezList:
-			Data.Chat.emotes.update({ FFZemIcon["name"] : { "type" : "FrankerFaceZ" }})
+    def execModule(message, username):
+        for module in modulesList['modules']:
+            if modulesList['modules'][module]['enabled']:
+                try:
+                    execFunc = getattr(globals()[module], "responder")
+                except AttributeError:
+                    break
+                if not username in Data.Chat.userlist:
+                    disp_name = Data.TwitchAPI.request(f'https://api.twitch.tv/kraken/users?login={username}')['users'][0]['display_name']
+                    Data.Chat.userlist.update({ username : { "display_name" : disp_name } })
+                diplay_username = Data.Chat.userlist[username]['display_name']
+                ret = execFunc(message, diplay_username)
+                if ret != None:
+                    Data.Chat.sendMessage(sock, f"/me {ret}")
+                    Data.Bot.logging_all(f"BOT(respond): {ret}")
+                    break
+    initWebFig()
+    while True:
+        sock.settimeout(360)
+        try:
+            response = sock.recv(1024).decode("utf-8")
+        except KeyboardInterrupt:
+            Data.Bot.logging_all("Script has interrupted")
+            return False
+        except Exception as e:
+            Data.Bot.logging_all(str(e))
+            Data.Bot.logging_all(str(response))
+            break
+        sock.settimeout(None)
+        if response == "PING :tmi.twitch.tv\r\n":
+            sock.send("PONG :tmi.twitch.tv\r\n".encode("utf-8"))
+        else: 
+            try:
+                username = re.search(r"\w+", response).group(0)
+                message = chat_message.sub("", response)
+            except Exception as e:
+                Data.Bot.logging_all(str(e))
+                Data.Bot.logging_all(str(response))
+                break
 
-		FFacezJSON = json.loads(urlRequest(f'https://api.frankerfacez.com/v1/room/{Data.Twitch.CHAN}'))
-		FFacezList = FFacezJSON["sets"][str(FFacezJSON["room"]["set"])]["emoticons"]
-		for FFZemIcon in FFacezList:
-			Data.Chat.emotes.update({ FFZemIcon["name"] : { "type" : "FrankerFaceZ" }})
+            if username != "tmi" and (username != Data.Twitch.NICK.lower() or username == "xpyctee"):
+                execMThread = threading.Thread(target=execModule, args=(message,username,))
+                execMThread.start()
 
-		Utils.Bot.logging_all("FrankerFaceZ emoticons Data Loaded")
-
-		globsBTTVList = json.loads(urlRequest("https://api.betterttv.net/2/emotes"))["emotes"]
-		for BTTVemIcon in globsBTTVList:
-			Data.Chat.emotes.update({ BTTVemIcon["code"] : { "type" : "BTTV" }})
-		
-		bttvList = json.loads(urlRequest(f'https://api.betterttv.net/2/channels/{Data.Twitch.CHAN}'))["emotes"]
-		for BTTVemIcon in bttvList:
-			Data.Chat.emotes.update({ BTTVemIcon["code"] : { "type" : "BTTV" }})
-		Utils.Bot.logging_all("BTTV emoticons Data Loaded")
-
-		emoticonsTwitch = Utils.TwitchAPI.request("https://api.twitch.tv/kraken/chat/emoticons")
-		for emIcon in emoticonsTwitch["emoticons"]:
-			Data.Chat.emotes.update({emIcon["regex"] : { "type" : "Twitch" }})# "id": emIcon["id"], "images": emIcon["images"] } })
-		emoticonsTwitch.clear()
-		Utils.Bot.logging_all("All Twitch emoticons Data Loaded")
-
-	lEIThread = threading.Thread(target=loadEmotIcons)
-	#lEIThread.start()
-	
-	modulesList = Utils.Bot.getModulesList()
-	for module in modulesList['modules']:
-		if modulesList['modules'][module]['enabled']:
-			status = "enabled"
-		else:
-			status = "disabled"
-		Utils.Bot.logging_all(f"Module: {str(module)} status: {status}")
-
-		if modulesList['modules'][module]['enabled']:
-			Data.Mods.globData[module] = {}
-			try:
-				execFunc = getattr(globals()[module], "starter")
-				execFThread = threading.Thread(target=execFunc)
-				execFThread.start()
-			except AttributeError:
-				pass
-			
-
-	def execModule(message, username):
-		for module in modulesList['modules']:
-			if modulesList['modules'][module]['enabled']:
-				try:
-					execFunc = getattr(globals()[module], "responder")
-				except AttributeError:
-					break
-				if not username in Data.Chat.userlist:
-					disp_name = Utils.TwitchAPI.request(f'https://api.twitch.tv/kraken/users?login={username}')['users'][0]['display_name']
-					Data.Chat.userlist.update({ username : { "display_name" : disp_name } })
-				diplay_username = Data.Chat.userlist[username]['display_name']
-				ret = execFunc(message, diplay_username)
-				if ret != None:
-					Utils.Chat.sendMessage(sock, f"/me {ret}")
-					Utils.Bot.logging_all(f"BOT(respond): {ret}")
-					break
-
-	while True:
-		sock.settimeout(360)
-		try:
-			response = sock.recv(1024).decode("utf-8")
-		except KeyboardInterrupt:
-			Utils.Bot.logging_all("Script has interrupted")
-			return False
-		except Exception as e:
-			Utils.Bot.logging_all(str(e))
-			Utils.Bot.logging_all(str(response))
-			break
-		sock.settimeout(None)
-		if response == "PING :tmi.twitch.tv\r\n":
-			sock.send("PONG :tmi.twitch.tv\r\n".encode("utf-8"))
-		else: 
-			try:
-				username = re.search(r"\w+", response).group(0)
-				message = chat_message.sub("", response)
-			except Exception as e:
-				Utils.Bot.logging_all(str(e))
-				Utils.Bot.logging_all(str(response))
-				break
-
-			if username != "tmi" and (username != Data.Twitch.NICK.lower() or username == "xpyctee"):
-				execMThread = threading.Thread(target=execModule, args=(message,username,))
-				execMThread.start()
-
-				Utils.Bot.logging_all(f"{username.strip()}: {message.strip()}")
-	return True
+                Data.Bot.logging_all(f"{username.strip()}: {message.strip()}")
+    return True
 
 reloading = True
 while reloading:
-	if __name__ == "__main__":
-		with open('config.yml') as configFile:
-			Data.Bot.settings = yaml.load(configFile, Loader=yaml.FullLoader)['settings']
-		Utils.Bot.reload_module(modules)
-		reloading = main()
+    if __name__ == "__main__":
+        with open('config.yml') as configFile:
+            Data.Bot.settings = yaml.load(configFile, Loader=yaml.FullLoader)['settings']
+        Data.Bot.reload_module(modules)
+        reloading = main()
