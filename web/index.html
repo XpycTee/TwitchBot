@@ -85,9 +85,10 @@
 						<span class="visuallyhidden">Accounts</span>
 					</button>
 					<ul class="mdl-menu mdl-menu--bottom-right mdl-js-menu mdl-js-ripple-effect" for="accbtn">
-						<li class="mdl-menu__item">{user_menu1}</li>
-						<li class="mdl-menu__item">{user_menu2}</li>
-						<!--li class="mdl-menu__item"><i class="material-icons">add</i>Add another account...</li-->
+						<a class="mdl-menu__item" href="/user_settings"><i class="material-icons">settings</i>User settings</a>
+            <li id="deAuth" class="mdl-menu__item"><i class="material-icons">exit_to_app</i>Exit</li>
+						<!--li class="mdl-menu__item">user_menu2</li>
+						<li class="mdl-menu__item"><i class="material-icons">add</i>Add another account...</li-->
 					</ul>
 				</div>
 			</header>
@@ -156,5 +157,6 @@
 </svg>
 <a href="https://github.com/google/material-design-lite/blob/mdl-1.x/templates/dashboard/" target="_blank" id="view-source" class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--colored mdl-color-text--white">View Source</a>
 <script src="https://code.getmdl.io/1.3.0/material.min.js"></script>
+<script src="/scripts.js"></script>
 </body>
 </html>

@@ -1,6 +1,14 @@
 #!/usr/bin/python3
-import sys, os, time, ssl, socket, re, json, yaml, threading, requests
-
+import sys
+import os
+import time
+import ssl
+import socket
+import re
+import json
+import yaml
+import threading
+import requests
 import urllib.request as urllib
 from time import sleep
 from web import main as web
@@ -9,8 +17,14 @@ import modules, Utils
 from modules import *
 
 def initWebFig():
-	threading.Thread(target=web.serve_on_port, args=(Data.Bot.settings['web']['tcp_port'],)).start()
-	threading.Thread(target=web.serve_on_port, args=(Data.Bot.settings['web']['ssl']['tcp_port'],Data.Bot.settings['web']['ssl']['enabled'],)).start()
+	ip = Data.Bot.settings['web']['ip_address']
+
+	port = int(Data.Bot.settings['web']['tcp_port'])
+	threading.Thread(target=web.serve_on_port, args=(ip,port,)).start()
+
+	sslEnabled = Data.Bot.settings['web']['ssl']['enabled']
+	port = int(Data.Bot.settings['web']['ssl']['tcp_port'])
+	threading.Thread(target=web.serve_on_port, args=(ip,port,sslEnabled,)).start()
 
 def sock_connecting():
 	"""
@@ -84,7 +98,7 @@ def main():
 		Utils.Bot.logging_all("All Twitch emoticons Data Loaded")
 
 	lEIThread = threading.Thread(target=loadEmotIcons)
-	lEIThread.start()
+	#lEIThread.start()
 	
 	modulesList = Utils.Bot.getModulesList()
 	for module in modulesList['modules']:
