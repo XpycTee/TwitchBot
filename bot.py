@@ -66,6 +66,7 @@ def main():
     fillOPThread.start()
 
     Data.Stream.channel_ID = Data.TwitchAPI.request(f'https://api.twitch.tv/kraken/users?login={Data.Twitch.CHAN}')['users'][0]['_id']    
+
     
     modulesList = Data.Bot.getModulesList()
     for module in modulesList['modules']:
@@ -93,8 +94,8 @@ def main():
                 except AttributeError:
                     break
                 if not username in Data.Chat.userlist:
-                    disp_name = Data.TwitchAPI.request(f'https://api.twitch.tv/kraken/users?login={username}')['users'][0]['display_name']
-                    Data.Chat.userlist.update({ username : { "display_name" : disp_name } })
+                    user = Data.TwitchAPI.request(f'https://api.twitch.tv/kraken/users?login={username}')['users'][0]
+                    Data.Chat.userlist.update({ username : { "display_name" : user['display_name'], "_id" :  user['_id'] } })
                 diplay_username = Data.Chat.userlist[username]['display_name']
                 ret = execFunc(message, diplay_username)
                 if ret != None:

@@ -4,8 +4,6 @@ import cgi
 import sys
 from http import cookies
 
-#sys.path.insert(0, "")
-#import Data
 
 cookie = cookies.SimpleCookie(os.environ['HTTP_COOKIE'])
 session = cookie.get("session")
@@ -18,7 +16,6 @@ else:
     username = session.split(":")[0]
 
 print("Content-type: text/html\r\n\r\n")
-#print(cookies.SimpleCookie(os.environ['HTTP_COOKIE'])," | ",os.environ['HTTP_COOKIE']," | ",cookie," | ",session)
 url = os.environ['SESSION_URI'][1:]
 if not logined:
     print("<meta http-equiv=\"refresh\" content=\"0;url=/login.html\" /> ")
